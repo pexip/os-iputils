@@ -1,0 +1,27 @@
+Description: Find libraries using gcc rather than make
+ make's facility of using -lfoo as a prerequisite doesn't work with
+ cross-building.  Use target-specific variables instead.
+Author: Wookey <wookey@wookware.org>
+Author: Colin Watson <cjwatson@ubuntu.com>
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/872370
+Forwarded: no
+Last-Update: 2011-11-08
+
+Index: b/Makefile
+===================================================================
+--- a/Makefile
++++ b/Makefile
+@@ -27,9 +27,11 @@
+ 
+ 
+ tftpd: tftpd.o tftpsubs.o
+-arping: arping.o -lsysfs
++arping: arping.o
++arping: LDLIBS = -lsysfs
+ ping: ping.o ping_common.o
+-ping6: ping6.o ping_common.o -lresolv -lcrypto
++ping6: ping6.o ping_common.o
++ping6: LDLIBS = -lresolv -lcrypto
+ ping.o ping6.o ping_common.o: ping_common.h
+ tftpd.o tftpsubs.o: tftp.h
+ 
