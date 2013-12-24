@@ -1,3 +1,9 @@
+iputils (3:20101006-1ubuntu1pexip1) pexip; urgency=low
+
+  * Prepare Pexip packaging
+
+ -- John-Mark Bell <jmb@pexip.com>  Tue, 24 Dec 2013 21:15:25 +0000
+
 iputils (3:20101006-1ubuntu1) precise; urgency=low
 
   * Support cross-building (thanks to Wookey <wookey@wookware.org> and Harry
