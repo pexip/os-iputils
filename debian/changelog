@@ -1,6 +1,7 @@
 iputils (3:20121221-5pexip1) pexip; urgency=low
 
   * Migrate to Jessie
+  * debian/control, debian/patches/libssl.patch: Use libssl
 
  -- John-Mark Bell <jmb@pexip.com>  Thu, 23 Feb 2017 19:56:36 +0000
 

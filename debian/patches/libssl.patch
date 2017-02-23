@@ -1,0 +1,13 @@
+diff --git a/Makefile b/Makefile
+index c62d9df..8569872 100644
+--- a/Makefile
++++ b/Makefile
+@@ -35,7 +35,7 @@ WITHOUT_IFADDRS=no
+ ARPING_DEFAULT_DEVICE=
+ 
+ # GNU TLS library for ping6 [yes|no|static]
+-USE_GNUTLS=yes
++USE_GNUTLS=no
+ # Crypto library for ping6 [shared|static]
+ USE_CRYPTO=shared
+ # Resolv library for ping6 [yes|static]
