@@ -1,3 +1,49 @@
+iputils (3:20161105-1pexip1) pexip; urgency=medium
+
+  * Migrate to Stretch
+
+ -- John-Mark Bell <jmb@pexip.com>  Wed, 11 Jul 2018 17:28:16 +0100
+
+iputils (3:20161105-1) unstable; urgency=medium
+
+  * New upstream release (Closes: #819204, #825754)
+  * Merge IPv6 support into tracepath, drop tracepath6 binary.
+  * Set debhelper compat level to 9
+  * Bump standards version to 3.9.8 (no changes needed).
+  * Switch to opensp for docbook processing (Closes: #837064)
+  * Fix issue with UDP destination port management in
+    traceroute6. (Closes: #843264)
+  * Explicitly build-depend on libidn11-dev
+
+ -- Noah Meyerhans <noahm@debian.org>  Wed, 09 Nov 2016 22:23:32 -0800
+
+iputils (3:20150815-2) unstable; urgency=medium
+
+  * Import upstream's fix to support systems with only one of IPv4 or
+    IPv6 enabled. (Closes: 816227)
+
+ -- Noah Meyerhans <noahm@debian.org>  Tue, 01 Mar 2016 06:47:28 -0800
+
+iputils (3:20150815-1) unstable; urgency=medium
+
+  * New upstream release (Closes: 146162, 219140, 815197, 732632)
+  * install ping6 and ping4 as symlinks to /bin/ping
+  * Bump standards version to 3.9.7 (no changes)
+  * Silence output during installation if setcap is successful
+    (Closes: 737577)
+  * Encode the debian/changelog date rather than the build date in
+    generated documentation in order to support reproducible builds.
+    (Closes: 783219)
+
+ -- Noah Meyerhans <noahm@debian.org>  Thu, 25 Feb 2016 09:55:01 -0800
+
+iputils (3:20121221-6) UNRELEASED; urgency=medium
+
+  * Remove setuid bits on binaries if setcap succeeds during 
+    reconfigure. (Closes: 778500)
+
+ -- Noah Meyerhans <noahm@debian.org>  Wed, 18 Mar 2015 20:29:32 -0700
+
 iputils (3:20121221-5+b2pexip1) pexip; urgency=low
 
   * Bump version

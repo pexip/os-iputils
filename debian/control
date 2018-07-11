@@ -3,10 +3,10 @@ Section: net
 Priority: extra
 Maintainer: Pexip AS <packaging@pexip.com>
 XSBC-Pexip-Original-Maintainer: Noah Meyerhans <noahm@debian.org>
-Standards-Version: 3.9.5
-Build-Depends: debhelper (>= 7), sp, sgmlspl, docbook, libcap-dev, libssl-dev
-Vcs-Git: git://git.debian.org/collab-maint/iputils.git
-Vcs-Browser: http://git.debian.org/?p=collab-maint/iputils.git;a=summary
+Standards-Version: 3.9.8
+Build-Depends: debhelper (>= 7), opensp, sgmlspl, docbook, libcap-dev, libssl-dev, libidn11-dev, bash (>= 3)
+Vcs-Git: https://anonscm.debian.org/git/collab-maint/iputils.git
+Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/iputils.git
 XS-Pexip-Upstream: http://ftp.debian.org/debian/ stretch
 
 Package: iputils-ping
@@ -29,10 +29,7 @@ Priority: optional
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Tools to trace the network path to a remote host
  The tracepath utility is similar to the traceroute utility, but also
- attempts to discover the MTU of the path.
- .
- This package also includes tracepath6 and traceroute6 utilities, which
- may be used on IPv6 networks.
+ attempts to discover the MTU of the path. Supports IPv4 and IPv6.
 
 Package: iputils-arping
 Architecture: any

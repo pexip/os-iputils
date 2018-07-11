@@ -8,7 +8,7 @@ if [ "$1" = configure ]; then
     # bit.
     if command -v setcap > /dev/null; then
         if setcap cap_net_raw+ep /usr/bin/arping; then
-            echo "Setcap worked! arping is not suid!"
+            chmod u-s /usr/bin/arping
         else
             echo "Setcap failed on /usr/bin/arping, falling back to setuid" >&2
             chmod u+s /usr/bin/arping
