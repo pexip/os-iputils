@@ -2,6 +2,7 @@ iputils (3:20161105-1pexip1) pexip; urgency=medium
 
   * Migrate to Stretch
   * debian/patches/libssl.patch: refresh
+  * debian/control: make iputils-ping depend on libcap2-bin
 
  -- John-Mark Bell <jmb@pexip.com>  Wed, 11 Jul 2018 17:28:16 +0100
 

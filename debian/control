@@ -13,8 +13,7 @@ Package: iputils-ping
 Architecture: any
 Provides: ping
 Priority: important
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Recommends: libcap2-bin
+Depends: ${shlibs:Depends}, ${misc:Depends}, libcap2-bin
 Description: Tools to test the reachability of network hosts
  The ping command sends ICMP ECHO_REQUEST packets to a host in order to
  test if the host is reachable via the network.
