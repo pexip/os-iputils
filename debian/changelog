@@ -1,3 +1,12 @@
+iputils (3:20180629-2+deb10u1) buster; urgency=medium
+
+  * Incorporate patches from Benjamin Poirier <benjamin.poirier@gmail.com> to
+    correct an issue in which ping would improperly exit with a failure code
+    when there were untried addresses still available in the getaddrinfo()
+    library call return value.  (Closes: #947921)
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 13 Jan 2020 15:29:01 -0800
+
 iputils (3:20180629-2) unstable; urgency=medium
 
   * Upstream no longer maintains the RELNOTES or README files in a useful

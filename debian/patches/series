@@ -1,1 +1,3 @@
 set_buildflags
+ping-fix-main-loop-over-multiple-addrinfo-results.patch
+ping-try-next-addrinfo-on-connect-failure.patch
