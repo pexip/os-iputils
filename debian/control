@@ -1,12 +1,12 @@
 Source: iputils
 Section: net
-Priority: extra
+Priority: optional
 Maintainer: Pexip AS <packaging@pexip.com>
 XSBC-Pexip-Original-Maintainer: Noah Meyerhans <noahm@debian.org>
-Standards-Version: 3.9.8
-Build-Depends: debhelper (>= 7), opensp, sgmlspl, docbook, libcap-dev, libssl1.0-dev, libidn11-dev, bash (>= 3)
-Vcs-Git: https://anonscm.debian.org/git/collab-maint/iputils.git
-Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/iputils.git
+Standards-Version: 4.1.4
+Build-Depends: debhelper (>= 7), xsltproc, docbook-xsl, libcap-dev, libssl1.0-dev, libidn11-dev, bash (>= 3)
+Vcs-Git: https://salsa.debian.org/debian/iputils.git
+Vcs-Browser: https://salsa.debian.org/debian/iputils
 XS-Pexip-Upstream: http://ftp.debian.org/debian/ buster
 
 Package: iputils-ping
@@ -24,7 +24,6 @@ Description: Tools to test the reachability of network hosts
 Package: iputils-tracepath
 Architecture: any
 Suggests: traceroute
-Priority: optional
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Tools to trace the network path to a remote host
  The tracepath utility is similar to the traceroute utility, but also
