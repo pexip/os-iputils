@@ -1,3 +1,10 @@
+iputils (3:20180629-2pexip1) pexip; urgency=medium
+
+  * Migrate to Buster
+  * Use idn2 to avoid FTBFS
+
+ -- Vincent Sanders <vince@pexip.com>  Mon, 02 Mar 2020 11:02:42 +0000
+
 iputils (3:20180629-2) unstable; urgency=medium
 
   * Upstream no longer maintains the RELNOTES or README files in a useful
