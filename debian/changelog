@@ -1,3 +1,18 @@
+iputils (3:20180629-2+deb10u1pexip1) pexip; urgency=medium
+
+  * New upstream version
+
+ -- Steve McIntyre <steve.mcintyre@pexip.com>  Mon, 13 Jul 2020 13:20:26 +0100
+
+iputils (3:20180629-2+deb10u1) buster; urgency=medium
+
+  * Incorporate patches from Benjamin Poirier <benjamin.poirier@gmail.com> to
+    correct an issue in which ping would improperly exit with a failure code
+    when there were untried addresses still available in the getaddrinfo()
+    library call return value.  (Closes: #947921)
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 13 Jan 2020 15:29:01 -0800
+
 iputils (3:20180629-2pexip1) pexip; urgency=medium
 
   * Migrate to Buster

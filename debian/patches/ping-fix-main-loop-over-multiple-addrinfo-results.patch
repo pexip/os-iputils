@@ -1,0 +1,84 @@
+From 769a6790437e883d72eebbabd06d33a05a0340ca Mon Sep 17 00:00:00 2001
+From: Benjamin Poirier <benjamin.poirier@gmail.com>
+Date: Thu, 26 Dec 2019 10:44:03 +0900
+Subject: [PATCH 1/2] ping: fix main loop over multiple addrinfo results
+
+Despite what the log of commit f68eec0eafad ("ping: perform dual-stack ping
+by default") says, main() was not designed to loop over multiple addresses
+returned by getaddrinfo().  This is apparent because until commit
+db11bc96a68c ("ping: make command to return from main()"), ping{4,6}_run()
+never returned (they always exited).  After commit db11bc96a68c, we
+encounter unexpected situations if getaddrinfo returns multiple results and
+ping{4,6}_run() return != 0.
+
+For example (notice echo reply is not received):
+
+    root@vsid:/src/iputils# ./builddir/ping/ping -w1 google.com
+    PING google.com(nrt12s22-in-x0e.1e100.net (2404:6800:4004:80c::200e)) 56 data bytes
+
+    --- google.com ping statistics ---
+    1 packets transmitted, 0 received, 100% packet loss, time 0ms
+
+    PING  (216.58.197.142) 56(84) bytes of data.
+
+    ---  ping statistics ---
+    1 packets transmitted, 0 received, 100% packet loss, time -1002ms
+
+    root@vsid:/src/iputils#
+
+Establish the following convention:
+
+* return value >= 0 -> exit with this code (same behavior as before commit
+  db11bc96a68c)
+
+* return value < 0 -> go on to next addrinfo result
+
+The second case will be used in the following patch.
+
+Fixes: db11bc96a68c ("ping: make command to return from main()")
+Signed-off-by: Benjamin Poirier <bpoirier@cumulusnetworks.com>
+---
+ ping.c         | 6 +++++-
+ ping6_common.c | 1 +
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/ping.c b/ping.c
+index 733477f..4d2de0f 100644
+--- a/ping.c
++++ b/ping.c
+@@ -528,8 +528,11 @@ main(int argc, char **argv)
+ 			exit(2);
+ 		}
+ 
+-		if (status == 0)
++		if (status >= 0)
+ 			break;
++		/* status < 0 means to go on to next addrinfo result, there
++		 * better be one. */
++		assert(ai->ai_next);
+ 	}
+ 
+ 	freeaddrinfo(result);
+@@ -537,6 +540,7 @@ main(int argc, char **argv)
+ 	return status;
+ }
+ 
++/* return >= 0: exit with this code, < 0: go on to next addrinfo result */
+ int ping4_run(int argc, char **argv, struct addrinfo *ai, socket_st *sock)
+ {
+ 	static const struct addrinfo hints = { .ai_family = AF_INET, .ai_protocol = IPPROTO_UDP, .ai_flags = getaddrinfo_flags };
+diff --git a/ping6_common.c b/ping6_common.c
+index 5991c2a..1f88e26 100644
+--- a/ping6_common.c
++++ b/ping6_common.c
+@@ -600,6 +600,7 @@ int niquery_option_handler(const char *opt_arg)
+ 	return ret;
+ }
+ 
++/* return >= 0: exit with this code, < 0: go on to next addrinfo result */
+ int ping6_run(int argc, char **argv, struct addrinfo *ai, struct socket_st *sock)
+ {
+ 	static const struct addrinfo hints = { .ai_family = AF_INET6, .ai_flags = getaddrinfo_flags };
+-- 
+2.25.0.rc0
+
