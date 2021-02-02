@@ -2,37 +2,41 @@ Source: iputils
 Section: net
 Priority: optional
 Maintainer: Noah Meyerhans <noahm@debian.org>
-Standards-Version: 4.1.4
-Build-Depends: debhelper (>= 7), xsltproc, docbook-xsl, libcap-dev, libgnutls-openssl-dev, libidn11-dev, bash (>= 3)
+Standards-Version: 4.5.0
+Build-Depends: debhelper-compat (= 13), xsltproc, docbook-xsl,
+ docbook-xsl-ns, libcap-dev,
+ libgcrypt-dev, libidn2-dev, bash (>= 3), meson, pkg-config
 Vcs-Git: https://salsa.debian.org/debian/iputils.git
 Vcs-Browser: https://salsa.debian.org/debian/iputils
+Homepage: https://github.com/iputils/iputils/
 
 Package: iputils-ping
 Architecture: any
 Provides: ping
 Priority: important
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Recommends: libcap2-bin
+Depends: libcap2-bin, ${shlibs:Depends}, ${misc:Depends}
+Multi-Arch: foreign
 Description: Tools to test the reachability of network hosts
  The ping command sends ICMP ECHO_REQUEST packets to a host in order to
  test if the host is reachable via the network.
  .
  This package includes a ping6 utility which supports IPv6 network
  connections.
- 
+
 Package: iputils-tracepath
 Architecture: any
 Suggests: traceroute
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Multi-Arch: foreign
 Description: Tools to trace the network path to a remote host
  The tracepath utility is similar to the traceroute utility, but also
  attempts to discover the MTU of the path. Supports IPv4 and IPv6.
 
 Package: iputils-arping
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Recommends: libcap2-bin
+Depends: libcap2-bin, ${shlibs:Depends}, ${misc:Depends}
 Conflicts: arping
+Multi-Arch: foreign
 Description: Tool to send ICMP echo requests to an ARP address
  The arping command acts like the standard ping command except it pings
  a machine by its ARP address instead of its IP address.  It is typically
@@ -42,6 +46,7 @@ Description: Tool to send ICMP echo requests to an ARP address
 Package: iputils-clockdiff
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Multi-Arch: foreign
 Description: Measure the time difference between networked computers
  Clockdiff computes the difference between the time of the machine on
  which it is called and the time of other network-accessible machines.
