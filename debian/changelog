@@ -1,3 +1,11 @@
+iputils (3:20180629-2+deb10u2) buster; urgency=medium
+
+  * Backport upstream fix for ping rounding errors (Closes: #920434)
+  * Backport upstream fix for tracepath target corruption
+    (Closes: #976277)
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 08 Mar 2021 11:46:59 -0800
+
 iputils (3:20180629-2+deb10u1) buster; urgency=medium
 
   * Incorporate patches from Benjamin Poirier <benjamin.poirier@gmail.com> to
