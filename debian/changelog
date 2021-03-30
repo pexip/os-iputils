@@ -1,3 +1,17 @@
+iputils (3:20180629-2+deb10u2pexip1) pexip; urgency=medium
+
+  * New upstream version
+
+ -- Mark Hymers <mark.hymers@pexip.com>  Tue, 30 Mar 2021 12:47:02 +0100
+
+iputils (3:20180629-2+deb10u2) buster; urgency=medium
+
+  * Backport upstream fix for ping rounding errors (Closes: #920434)
+  * Backport upstream fix for tracepath target corruption
+    (Closes: #976277)
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 08 Mar 2021 11:46:59 -0800
+
 iputils (3:20180629-2+deb10u1pexip2) pexip; urgency=medium
 
   * Rebuild in buster environment

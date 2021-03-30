@@ -1,0 +1,39 @@
+From: Noah Meyerhans <noahm@debian.org>
+Description: Backport ping timing fixes from upstream
+Bug-Debian: https://bugs.debian.org/920434
+
+---
+ ping_common.c | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
+
+Index: iputils/ping_common.c
+===================================================================
+--- iputils.orig/ping_common.c
++++ iputils/ping_common.c
+@@ -853,17 +853,17 @@ restamp:
+ 			return 1;
+ 		}
+ 		if (timing) {
+-			if (triptime >= 100000)
+-				printf(" time=%ld ms", (triptime+500)/1000);
+-			else if (triptime >= 10000)
+-				printf(" time=%ld.%01ld ms", triptime/1000,
+-				       ((triptime%1000)+50)/100);
++			if (triptime >= 100000 - 50)
++				printf(" time=%ld ms", (triptime + 500) / 1000);
++			else if (triptime >= 10000 - 5)
++				printf(" time=%ld.%01ld ms", (triptime + 50) / 1000,
++				       ((triptime + 50) % 1000) / 100);
+ 			else if (triptime >= 1000)
+-				printf(" time=%ld.%02ld ms", triptime/1000,
+-				       ((triptime%1000)+5)/10);
++				printf(" time=%ld.%02ld ms", (triptime + 5) / 1000,
++				       ((triptime + 5) % 1000) / 10);
+ 			else
+-				printf(" time=%ld.%03ld ms", triptime/1000,
+-				       triptime%1000);
++				printf(" time=%ld.%03ld ms", triptime / 1000,
++				       triptime % 1000);
+ 		}
+ 		if (dupflag)
+ 			printf(" (DUP!)");
