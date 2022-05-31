@@ -27,689 +27,599 @@
  * SUCH DAMAGE.
  */
 
-#include <time.h>
-#include <sys/types.h>
-#include <sys/param.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
-#include <sys/time.h>
-#include <sys/timex.h>
+/*
+ * Clockdiff computes the difference between the time of the machine on which it is
+ * called and the time of the machines given as argument.  The time differences measured
+ * by clockdiff are obtained using a sequence of ICMP TSTAMP messages which are returned
+ * to the sender by the IP module in the remote machine.
+ *
+ * In order to compare clocks of machines in different time zones, the time is
+ * transmitted (as a 32-bit value) in milliseconds since midnight UT.  If a hosts uses a
+ * different time format, it should set the high order bit of the 32-bit quantity it
+ * transmits.
+ *
+ * However, VMS apparently transmits the time in milliseconds since midnight local time
+ * (rather than GMT) without setting the high order bit.  Furthermore, it does not
+ * understand daylight-saving time.  This makes clockdiff behaving inconsistently with
+ * hosts running VMS.
+ *
+ * In order to reduce the sensitivity to the variance of message transmission time,
+ * clockdiff sends a sequence of messages.  Yet, measures between two `distant' hosts can
+ * be affected by a small error.  The error can, however, be reduced by increasing the
+ * number of messages sent in each measurement.
+ */
+
+#define TSPTYPES
+
+#include <arpa/inet.h>
 #include <errno.h>
-#include <sys/socket.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <getopt.h>
+#include <linux/types.h>
+#include <math.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
-#define TSPTYPES
-#include <fcntl.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <errno.h>
-#include <linux/types.h>
-#ifdef CAPABILITIES
-#include <sys/capability.h>
+#include <poll.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/param.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/timex.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
+
+#ifdef HAVE_LIBCAP
+# include <sys/capability.h>
 #endif
 
-void usage(void) __attribute__((noreturn));
+#include "iputils_common.h"
 
-#define MAX_HOSTNAMELEN	NI_MAXHOST
+enum {
+	RANGE = 1,		/* best expected round-trip time, ms */
+	MSGS = 50,
+	TRIALS = 10,
+
+	GOOD = 0,
+	UNREACHABLE = 2,
+	NONSTDTIME = 3,
+	BREAK = 4,
+	CONTINUE = 5,
+	HOSTDOWN = 0x7fffffff,
+
+	BIASP = 43199999,
+	BIASN = -43200000,
+	MODULO =  86400000,
+	PROCESSING_TIME	= 0,	/* ms. to reduce error in measurement */
+
+	PACKET_IN = 1024
+};
+
+enum {
+	time_format_ctime,
+	time_format_iso
+};
+
+struct run_state {
+	int interactive;
+	uint16_t id;
+	int sock_raw;
+	struct sockaddr_in server;
+	int ip_opt_len;
+	int measure_delta;
+	int measure_delta1;
+	unsigned short seqno;
+	unsigned short seqno0;
+	unsigned short acked;
+	long rtt;
+	long min_rtt;
+	long rtt_sigma;
+	char *hisname;
+	int time_format;
+};
+
+struct measure_vars {
+	struct timespec ts1;
+	struct timespec tout;
+	int count;
+	int cc;
+	unsigned char packet[PACKET_IN];
+	socklen_t length;
+	struct icmphdr *icp;
+	struct iphdr *ip;
+	int msgcount;
+	long min1;
+	long min2;
+};
 
 /*
- * Checksum routine for Internet Protocol family headers.
+ * All includes, definitions, struct declarations, and global variables are above.  After
+ * this comment all you can find is functions.
+ */
+
+/*
+ * addcarry() - checksum routine for Internet Protocol family headers.
  *
- * This routine is very heavily used in the network
- * code and should be modified for each CPU to be as fast as possible.
+ * This routine is very heavily used in the network code and should be modified for each
+ * CPU to be as fast as possible.
  *
  * This implementation is TAHOE version.
  */
-
-#undef	ADDCARRY
-#define ADDCARRY(sum) { \
-	if (sum & 0xffff0000) {	\
-		sum &= 0xffff; \
-		sum++; \
-	} \
+static inline int addcarry(int sum)
+{
+	if (sum & 0xffff0000) {
+		sum &= 0xffff;
+		sum++;
+	}
+	return sum;
 }
 
-int in_cksum(unsigned short *addr, int len)
+static int in_cksum(unsigned short *addr, int len)
 {
 	union word {
-		char	c[2];
-		unsigned short	s;
+		char c[2];
+		unsigned short s;
 	} u;
 	int sum = 0;
 
 	while (len > 0) {
-		/*
-		 * add by words.
-		 */
+		/* add by words */
 		while ((len -= 2) >= 0) {
 			if ((unsigned long)addr & 0x1) {
 				/* word is not aligned */
 				u.c[0] = *(char *)addr;
-				u.c[1] = *((char *)addr+1);
+				u.c[1] = *((char *)addr + 1);
 				sum += u.s;
 				addr++;
 			} else
 				sum += *addr++;
-			ADDCARRY(sum);
+			sum = addcarry(sum);
 		}
 		if (len == -1)
-			/*
-			 * Odd number of bytes.
-			 */
+			/* odd number of bytes */
 			u.c[0] = *(unsigned char *)addr;
 	}
 	if (len == -1) {
-		/* The last mbuf has odd # of bytes. Follow the
-		   standard (the odd byte is shifted left by 8 bits) */
+		/*
+		 * The last mbuf has odd # of bytes.  Follow the standard (the odd byte
+		 * is shifted left by 8 bits)
+		 */
 		u.c[1] = 0;
 		sum += u.s;
-		ADDCARRY(sum);
+		sum = addcarry(sum);
 	}
 	return (~sum & 0xffff);
 }
 
-#define ON		1
-#define OFF		0
-
-#define RANGE		1		/* best expected round-trip time, ms */
-#define MSGS 		50
-#define TRIALS		10
-
-#define GOOD		0
-#define UNREACHABLE	2
-#define NONSTDTIME	3
-#define HOSTDOWN 	0x7fffffff
-
-
-int interactive = 0;
-uint16_t id;
-int sock;
-int sock_raw;
-struct sockaddr_in server;
-int ip_opt_len = 0;
-
-#define BIASP	 	43199999
-#define BIASN		-43200000
-#define MODULO	 	86400000
-#define PROCESSING_TIME	0 	/* ms. to reduce error in measurement */
-
-#define PACKET_IN	1024
-
-int measure_delta;
-int measure_delta1;
-static unsigned short seqno, seqno0, acked;
-long rtt = 1000;
-long min_rtt;
-long rtt_sigma = 0;
-
-/*
- * Measures the differences between machines' clocks using
- * ICMP timestamp messages.
- */
-int
-measure(struct sockaddr_in * addr)
+static int measure_inner_loop(struct run_state *ctl, struct measure_vars *mv)
 {
-	socklen_t length;
-	int msgcount;
-	int cc, count;
-	fd_set ready;
-	long sendtime, recvtime, histime;
-	long min1, min2, diff;
-	long delta1, delta2;
-	struct timeval tv1, tout;
-	unsigned char packet[PACKET_IN], opacket[64];
-	struct icmphdr *icp;
-	struct icmphdr *oicp = (struct icmphdr *) opacket;
-	struct iphdr *ip = (struct iphdr *) packet;
+	long delta1;
+	long delta2;
+	long diff;
+	long histime = 0;
+	long histime1 = 0;
+	long recvtime;
+	long sendtime;
+	struct pollfd p = { .fd = ctl->sock_raw, .events = POLLIN | POLLHUP };
 
-	min1 = min2 = 0x7fffffff;
-	min_rtt = 0x7fffffff;
-	measure_delta = HOSTDOWN;
-	measure_delta1 = HOSTDOWN;
+	{
+		long tmo = ctl->rtt + ctl->rtt_sigma;
 
-/* empties the icmp input queue */
-	FD_ZERO(&ready);
-
-empty:
-	tout.tv_sec = tout.tv_usec = 0;
-	FD_SET(sock_raw, &ready);
-	if (select(FD_SETSIZE, &ready, (fd_set *)0, (fd_set *)0, &tout)) {
-		length = sizeof(struct sockaddr_in);
-		cc = recvfrom(sock_raw, (char *)packet, PACKET_IN, 0,
-		    (struct sockaddr *)NULL, &length);
-		if (cc < 0)
-			return -1;
-		goto empty;
+		mv->tout.tv_sec = tmo / 1000;
+		mv->tout.tv_nsec = (tmo - (tmo / 1000) * 1000) * 1000000;
 	}
 
-	/*
-	 * To measure the difference, select MSGS messages whose round-trip
-	 * time is smaller than RANGE if ckrange is 1, otherwise simply
-	 * select MSGS messages regardless of round-trip transmission time.
-	 * Choose the smallest transmission time in each of the two directions.
-	 * Use these two latter quantities to compute the delta between
-	 * the two clocks.
-	 */
+	if ((mv->count = ppoll(&p, 1, &mv->tout, NULL)) <= 0)
+		return BREAK;
 
-	length = sizeof(struct sockaddr_in);
-	oicp->type = ICMP_TIMESTAMP;
-	oicp->code = 0;
-	oicp->checksum = 0;
-	oicp->un.echo.id = id;
-	((__u32*)(oicp+1))[0] = 0;
-	((__u32*)(oicp+1))[1] = 0;
-	((__u32*)(oicp+1))[2] = 0;
-	FD_ZERO(&ready);
+	clock_gettime(CLOCK_REALTIME, &mv->ts1);
+	mv->cc = recvfrom(ctl->sock_raw, (char *)mv->packet, PACKET_IN, 0, NULL, &mv->length);
 
-	acked = seqno = seqno0 = 0;
+	if (mv->cc < 0)
+		return (-1);
 
-	for (msgcount = 0; msgcount < MSGS; ) {
+	mv->icp = (struct icmphdr *)(mv->packet + (mv->ip->ihl << 2));
 
-	/*
-	 * If no answer is received for TRIALS consecutive times,
-	 * the machine is assumed to be down
-	 */
-		if (seqno - acked > TRIALS)
-			return HOSTDOWN;
+	if (((ctl->ip_opt_len && mv->icp->type == ICMP_ECHOREPLY
+	      && mv->packet[20] == IPOPT_TIMESTAMP)
+	     || mv->icp->type == ICMP_TIMESTAMPREPLY)
+	    && mv->icp->un.echo.id == ctl->id && mv->icp->un.echo.sequence >= ctl->seqno0
+	    && mv->icp->un.echo.sequence <= ctl->seqno) {
+		int i;
+		uint8_t *opt = mv->packet + 20;
 
-		oicp->un.echo.sequence = ++seqno;
-		oicp->checksum = 0;
+		if (ctl->acked < mv->icp->un.echo.sequence)
+			ctl->acked = mv->icp->un.echo.sequence;
+		if (ctl->ip_opt_len) {
+			if ((opt[3] & 0xF) != IPOPT_TS_PRESPEC) {
+				fprintf(stderr, _("Wrong timestamp %d\n"), opt[3] & 0xF);
+				return NONSTDTIME;
+			}
+			if (opt[3] >> 4) {
+				if ((opt[3] >> 4) != 1 || ctl->ip_opt_len != 4 + 3 * 8)
+					fprintf(stderr, _("Overflow %d hops\n"), opt[3] >> 4);
+			}
+			sendtime = recvtime = histime = histime1 = 0;
+			for (i = 0; i < (opt[2] - 5) / 8; i++) {
+				uint32_t *timep = (uint32_t *) (opt + 4 + i * 8 + 4);
+				uint32_t t = ntohl(*timep);
 
-		(void)gettimeofday (&tv1, (struct timezone *)0);
-		*(__u32*)(oicp+1) = htonl((tv1.tv_sec % (24*60*60)) * 1000
-					  + tv1.tv_usec / 1000);
-		oicp->checksum = in_cksum((unsigned short *)oicp, sizeof(*oicp) + 12);
+				if (t & 0x80000000)
+					return NONSTDTIME;
 
-		count = sendto(sock_raw, (char *)opacket, sizeof(*oicp)+12, 0,
-			       (struct sockaddr *)addr, sizeof(struct sockaddr_in));
-
-		if (count < 0)
-			return UNREACHABLE;
-
-		for (;;) {
-			FD_ZERO(&ready);
-			FD_SET(sock_raw, &ready);
-			{
-			  long tmo = rtt + rtt_sigma;
-			  tout.tv_sec =  tmo/1000;
-			  tout.tv_usec = (tmo - (tmo/1000)*1000)*1000;
+				if (i == 0)
+					sendtime = t;
+				if (i == 1)
+					histime = histime1 = t;
+				if (i == 2) {
+					if (ctl->ip_opt_len == 4 + 4 * 8)
+						histime1 = t;
+					else
+						recvtime = t;
+				}
+				if (i == 3)
+					recvtime = t;
 			}
 
-			if ((count = select(FD_SETSIZE, &ready, (fd_set *)0,
-			    (fd_set *)0, &tout)) <= 0)
-				break;
-
-			(void)gettimeofday(&tv1, (struct timezone *)0);
-			cc = recvfrom(sock_raw, (char *)packet, PACKET_IN, 0,
-			    (struct sockaddr *)NULL, &length);
-
-			if (cc < 0)
-				return(-1);
-
-			icp = (struct icmphdr *)(packet + (ip->ihl << 2));
-			if( icp->type == ICMP_TIMESTAMPREPLY &&
-			    icp->un.echo.id == id && icp->un.echo.sequence >= seqno0 &&
-						  icp->un.echo.sequence <= seqno) {
-			  if (acked < icp->un.echo.sequence)
-			    acked = icp->un.echo.sequence;
-
-			  recvtime = (tv1.tv_sec % (24*60*60)) * 1000 +
-				     tv1.tv_usec / 1000;
-			  sendtime = ntohl(*(__u32*)(icp+1));
-			  diff = recvtime - sendtime;
-		/*
-		 * diff can be less than 0 aroud midnight
-		 */
-			  if (diff < 0)
-			    continue;
-			  rtt = (rtt * 3 + diff)/4;
-			  rtt_sigma = (rtt_sigma *3 + abs(diff-rtt))/4;
-			  msgcount++;
-			  histime = ntohl(((__u32*)(icp+1))[1]);
-		/*
-		 * a hosts using a time format different from
-		 * ms. since midnight UT (as per RFC792) should
-		 * set the high order bit of the 32-bit time
-		 * value it transmits.
-		 */
+			if (!(sendtime & histime & histime1 & recvtime)) {
+				fprintf(stderr, _("wrong timestamps\n"));
+				return -1;
+			}
+		} else {
+			recvtime = (mv->ts1.tv_sec % (24 * 60 * 60)) * 1000 +
+					mv->ts1.tv_nsec / 1000000;
+			sendtime = ntohl(*(uint32_t *) (mv->icp + 1));
+		}
+		diff = recvtime - sendtime;
+		/* diff can be less than 0 around midnight */
+		if (diff < 0)
+			return CONTINUE;
+		ctl->rtt = (ctl->rtt * 3 + diff) / 4;
+		ctl->rtt_sigma = (ctl->rtt_sigma * 3 + labs(diff - ctl->rtt)) / 4;
+		mv->msgcount++;
+		if (!ctl->ip_opt_len) {
+			histime = ntohl(((uint32_t *) (mv->icp + 1))[1]);
+			/*
+			 * a hosts using a time format different from ms.  since midnight
+			 * UT (as per RFC792) should set the high order bit of the 32-bit
+			 * time value it transmits.
+			 */
 			if ((histime & 0x80000000) != 0)
-			  return NONSTDTIME;
+				return NONSTDTIME;
+		}
+		if (ctl->interactive) {
+			printf(".");
+			fflush(stdout);
+		}
 
-			if (interactive) {
-			  printf(".");
-			  fflush(stdout);
-			}
-
-			delta1 = histime - sendtime;
+		delta1 = histime - sendtime;
 		/*
-		 * Handles wrap-around to avoid that around
-		 * midnight small time differences appear
-		 * enormous. However, the two machine's clocks
-		 * must be within 12 hours from each other.
+		 * Handles wrap-around to avoid that around midnight small time
+		 * differences appear enormous.  However, the two machine's clocks must
+		 * be within 12 hours from each other.
 		 */
-			if (delta1 < BIASN)
-				delta1 += MODULO;
-			else if (delta1 > BIASP)
-				delta1 -= MODULO;
+		if (delta1 < BIASN)
+			delta1 += MODULO;
+		else if (delta1 > BIASP)
+			delta1 -= MODULO;
 
+		if (ctl->ip_opt_len)
+			delta2 = recvtime - histime1;
+		else
 			delta2 = recvtime - histime;
-			if (delta2 < BIASN)
-				delta2 += MODULO;
-			else if (delta2 > BIASP)
-				delta2 -= MODULO;
+		if (delta2 < BIASN)
+			delta2 += MODULO;
+		else if (delta2 > BIASP)
+			delta2 -= MODULO;
 
-			if (delta1 < min1)
-				min1 = delta1;
-			if (delta2 < min2)
-				min2 = delta2;
-			if (delta1 + delta2 < min_rtt) {
-			  min_rtt  = delta1 + delta2;
-			  measure_delta1 = (delta1 - delta2)/2 + PROCESSING_TIME;
-			}
-			if (diff < RANGE) {
-				min1 = delta1;
-				min2 = delta2;
-				goto good_exit;
-			}
-		      }
+		if (delta1 < mv->min1)
+			mv->min1 = delta1;
+		if (delta2 < mv->min2)
+			mv->min2 = delta2;
+		if (delta1 + delta2 < ctl->min_rtt) {
+			ctl->min_rtt = delta1 + delta2;
+			ctl->measure_delta1 = (delta1 - delta2) / 2 + PROCESSING_TIME;
+		}
+		if (diff < RANGE) {
+			mv->min1 = delta1;
+			mv->min2 = delta2;
+			return BREAK;
 		}
 	}
-
-good_exit:
-	measure_delta = (min1 - min2)/2 + PROCESSING_TIME;
-	return GOOD;
+	return CONTINUE;
 }
 
-char *myname, *hisname;
-
-int
-measure_opt(struct sockaddr_in * addr)
+/*
+ * Measures the differences between machines' clocks using ICMP timestamp messages.
+ */
+static int measure(struct run_state *ctl)
 {
-	socklen_t length;
-	int msgcount;
-	int cc, count;
-	fd_set ready;
-	long sendtime, recvtime, histime, histime1;
-	long min1, min2, diff;
-	long delta1, delta2;
-	struct timeval tv1, tout;
-	unsigned char packet[PACKET_IN], opacket[64];
-	struct icmphdr *icp;
-	struct icmphdr *oicp = (struct icmphdr *) opacket;
-	struct iphdr *ip = (struct iphdr *) packet;
+	struct measure_vars mv = {
+		.min1 = 0x7fffffff,
+		.min2 = 0x7fffffff
+	};
+	unsigned char opacket[64] = { 0 };
+	struct icmphdr *oicp = (struct icmphdr *)opacket;
+	struct pollfd p = { .fd = ctl->sock_raw, .events = POLLIN | POLLHUP };
 
-	min1 = min2 = 0x7fffffff;
-	min_rtt = 0x7fffffff;
-	measure_delta = HOSTDOWN;
-	measure_delta1 = HOSTDOWN;
+	mv.ip = (struct iphdr *)mv.packet;
+	ctl->min_rtt = 0x7fffffff;
+	ctl->measure_delta = HOSTDOWN;
+	ctl->measure_delta1 = HOSTDOWN;
 
-/* empties the icmp input queue */
-	FD_ZERO(&ready);
-empty:
-	tout.tv_sec = tout.tv_usec = 0;
-	FD_SET(sock_raw, &ready);
-	if (select(FD_SETSIZE, &ready, (fd_set *)0, (fd_set *)0, &tout)) {
-		length = sizeof(struct sockaddr_in);
-		cc = recvfrom(sock_raw, (char *)packet, PACKET_IN, 0,
-		    (struct sockaddr *)NULL, &length);
-		if (cc < 0)
+	/* empties the icmp input queue */
+ empty:
+	if (ppoll(&p, 1, &mv.tout, NULL)) {
+		mv.length = sizeof(struct sockaddr_in);
+		mv.cc = recvfrom(ctl->sock_raw, (char *)mv.packet, PACKET_IN, 0,
+			      NULL, &mv.length);
+		if (mv.cc < 0)
 			return -1;
 		goto empty;
 	}
 
 	/*
-	 * To measure the difference, select MSGS messages whose round-trip
-	 * time is smaller than RANGE if ckrange is 1, otherwise simply
-	 * select MSGS messages regardless of round-trip transmission time.
-	 * Choose the smallest transmission time in each of the two directions.
-	 * Use these two latter quantities to compute the delta between
-	 * the two clocks.
+	 * To measure the difference, select MSGS messages whose round-trip time is
+	 * smaller than RANGE if ckrange is 1, otherwise simply select MSGS messages
+	 * regardless of round-trip transmission time.  Choose the smallest transmission
+	 * time in each of the two directions.  Use these two latter quantities to
+	 * compute the delta between the two clocks.
 	 */
 
-	length = sizeof(struct sockaddr_in);
-	oicp->type = ICMP_ECHO;
+	mv.length = sizeof(struct sockaddr_in);
+	if (ctl->ip_opt_len)
+		oicp->type = ICMP_ECHO;
+	else
+		oicp->type = ICMP_TIMESTAMP;
 	oicp->code = 0;
 	oicp->checksum = 0;
-	oicp->un.echo.id = id;
-	((__u32*)(oicp+1))[0] = 0;
-	((__u32*)(oicp+1))[1] = 0;
-	((__u32*)(oicp+1))[2] = 0;
+	oicp->un.echo.id = ctl->id;
+	((uint32_t *) (oicp + 1))[0] = 0;
+	((uint32_t *) (oicp + 1))[1] = 0;
+	((uint32_t *) (oicp + 1))[2] = 0;
 
-	FD_ZERO(&ready);
+	ctl->acked = ctl->seqno = ctl->seqno0 = 0;
 
-	acked = seqno = seqno0 = 0;
+	for (mv.msgcount = 0; mv.msgcount < MSGS;) {
+		char escape = 0;
 
-	for (msgcount = 0; msgcount < MSGS; ) {
-
-	/*
-	 * If no answer is received for TRIALS consecutive times,
-	 * the machine is assumed to be down
-	 */
-		if ( seqno - acked > TRIALS) {
+		/*
+		 * If no answer is received for TRIALS consecutive times, the machine is
+		 * assumed to be down
+		 */
+		if (ctl->seqno - ctl->acked > TRIALS) {
 			errno = EHOSTDOWN;
 			return HOSTDOWN;
 		}
-		oicp->un.echo.sequence = ++seqno;
+
+		oicp->un.echo.sequence = ++ctl->seqno;
 		oicp->checksum = 0;
 
-		gettimeofday (&tv1, NULL);
-		((__u32*)(oicp+1))[0] = htonl((tv1.tv_sec % (24*60*60)) * 1000
-					      + tv1.tv_usec / 1000);
-		oicp->checksum = in_cksum((unsigned short *)oicp, sizeof(*oicp)+12);
+		clock_gettime(CLOCK_REALTIME, &mv.ts1);
+		*(uint32_t *) (oicp + 1) =
+		    htonl((mv.ts1.tv_sec % (24 * 60 * 60)) * 1000 + mv.ts1.tv_nsec / 1000000);
+		oicp->checksum = in_cksum((unsigned short *)oicp, sizeof(*oicp) + 12);
 
-		count = sendto(sock_raw, (char *)opacket, sizeof(*oicp)+12, 0,
-			       (struct sockaddr *)addr, sizeof(struct sockaddr_in));
+		mv.count = sendto(ctl->sock_raw, (char *)opacket, sizeof(*oicp) + 12, 0,
+			       (struct sockaddr *)&ctl->server, sizeof(struct sockaddr_in));
 
-		if (count < 0) {
+		if (mv.count < 0) {
 			errno = EHOSTUNREACH;
 			return UNREACHABLE;
 		}
 
-		for (;;) {
-			FD_ZERO(&ready);
-			FD_SET(sock_raw, &ready);
-			{
-				long tmo = rtt + rtt_sigma;
-				tout.tv_sec =  tmo/1000;
-				tout.tv_usec = (tmo - (tmo/1000)*1000)*1000;
-			}
+		while (!escape) {
+			int ret = measure_inner_loop(ctl, &mv);
 
-			if ((count = select(FD_SETSIZE, &ready, (fd_set *)0,
-			    (fd_set *)0, &tout)) <= 0)
-				break;
-
-			(void)gettimeofday(&tv1, (struct timezone *)0);
-			cc = recvfrom(sock_raw, (char *)packet, PACKET_IN, 0,
-				      (struct sockaddr *)NULL, &length);
-
-			if (cc < 0)
-				return(-1);
-
-			icp = (struct icmphdr *)(packet + (ip->ihl << 2));
-			if (icp->type == ICMP_ECHOREPLY &&
-			    packet[20] == IPOPT_TIMESTAMP &&
-			    icp->un.echo.id == id &&
-			    icp->un.echo.sequence >= seqno0 &&
-			    icp->un.echo.sequence <= seqno) {
-				int i;
-				__u8 *opt = packet+20;
-
-				if (acked < icp->un.echo.sequence)
-					acked = icp->un.echo.sequence;
-				if ((opt[3]&0xF) != IPOPT_TS_PRESPEC) {
-					fprintf(stderr, "Wrong timestamp %d\n", opt[3]&0xF);
-					return NONSTDTIME;
-				}
-				if (opt[3]>>4) {
-					if ((opt[3]>>4) != 1 || ip_opt_len != 4+3*8)
-						fprintf(stderr, "Overflow %d hops\n", opt[3]>>4);
-				}
-				sendtime = recvtime = histime = histime1 = 0;
-				for (i=0; i < (opt[2]-5)/8; i++) {
-					__u32 *timep = (__u32*)(opt+4+i*8+4);
-					__u32 t = ntohl(*timep);
-
-					if (t & 0x80000000)
-						return NONSTDTIME;
-
-					if (i == 0)
-						sendtime = t;
-					if (i == 1)
-						histime = histime1 = t;
-					if (i == 2) {
-						if (ip_opt_len == 4+4*8)
-							histime1 = t;
-						else
-							recvtime = t;
-					}
-					if (i == 3)
-						recvtime = t;
-				}
-
-				if (!(sendtime&histime&histime1&recvtime)) {
-					fprintf(stderr, "wrong timestamps\n");
-					return -1;
-				}
-
-				diff = recvtime - sendtime;
-				/*
-				 * diff can be less than 0 aroud midnight
-				 */
-				if (diff < 0)
+			switch (ret) {
+				case BREAK:
+					escape = 1;
+					break;
+				case CONTINUE:
 					continue;
-				rtt = (rtt * 3 + diff)/4;
-				rtt_sigma = (rtt_sigma *3 + abs(diff-rtt))/4;
-				msgcount++;
-
-				if (interactive) {
-					printf(".");
-					fflush(stdout);
-				}
-
-				delta1 = histime - sendtime;
-				/*
-				 * Handles wrap-around to avoid that around
-				 * midnight small time differences appear
-				 * enormous. However, the two machine's clocks
-				 * must be within 12 hours from each other.
-				 */
-				if (delta1 < BIASN)
-					delta1 += MODULO;
-				else if (delta1 > BIASP)
-					delta1 -= MODULO;
-
-				delta2 = recvtime - histime1;
-				if (delta2 < BIASN)
-					delta2 += MODULO;
-				else if (delta2 > BIASP)
-					delta2 -= MODULO;
-
-				if (delta1 < min1)
-					min1 = delta1;
-				if (delta2 < min2)
-					min2 = delta2;
-				if (delta1 + delta2 < min_rtt) {
-					min_rtt  = delta1 + delta2;
-					measure_delta1 = (delta1 - delta2)/2 + PROCESSING_TIME;
-				}
-				if (diff < RANGE) {
-					min1 = delta1;
-					min2 = delta2;
-					goto good_exit;
-				}
+				default:
+					return ret;
 			}
 		}
 	}
-
-good_exit:
-	measure_delta = (min1 - min2)/2 + PROCESSING_TIME;
+	ctl->measure_delta = (mv.min1 - mv.min2) / 2 + PROCESSING_TIME;
 	return GOOD;
 }
 
-
-/*
- * Clockdiff computes the difference between the time of the machine on
- * which it is called and the time of the machines given as argument.
- * The time differences measured by clockdiff are obtained using a sequence
- * of ICMP TSTAMP messages which are returned to the sender by the IP module
- * in the remote machine.
- * In order to compare clocks of machines in different time zones, the time
- * is transmitted (as a 32-bit value) in milliseconds since midnight UT.
- * If a hosts uses a different time format, it should set the high order
- * bit of the 32-bit quantity it transmits.
- * However, VMS apparently transmits the time in milliseconds since midnight
- * local time (rather than GMT) without setting the high order bit.
- * Furthermore, it does not understand daylight-saving time.  This makes
- * clockdiff behaving inconsistently with hosts running VMS.
- *
- * In order to reduce the sensitivity to the variance of message transmission
- * time, clockdiff sends a sequence of messages.  Yet, measures between
- * two `distant' hosts can be affected by a small error. The error can, however,
- * be reduced by increasing the number of messages sent in each measurement.
- */
-
-void
-usage() {
-  fprintf(stderr, "Usage: clockdiff [-o] <host>\n");
-  exit(1);
-}
-
-void drop_rights(void) {
-#ifdef CAPABILITIES
+static void drop_rights(void)
+{
+#ifdef HAVE_LIBCAP
 	cap_t caps = cap_init();
-	if (cap_set_proc(caps)) {
-		perror("clockdiff: cap_set_proc");
-		exit(-1);
-	}
+
+	if (cap_set_proc(caps))
+		error(-1, errno, "cap_set_proc");
 	cap_free(caps);
 #endif
-	if (setuid(getuid())) {
-		perror("clockdiff: setuid");
-		exit(-1);
-	}
+	if (setuid(getuid()))
+		error(-1, errno, "setuid");
 }
 
-int
-main(int argc, char *argv[])
+static void usage(int exit_status)
 {
-	int measure_status;
-	struct addrinfo hints = { .ai_family = AF_INET, .ai_socktype = SOCK_RAW, .ai_flags = AI_CANONNAME };
-	struct addrinfo *result;
-	int status;
-	char hostname[MAX_HOSTNAMELEN];
-	int s_errno = 0;
-	int n_errno = 0;
-
-	if (argc < 2) {
-		drop_rights();
-		usage();
-	}
-
-	sock_raw = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
-	s_errno = errno;
-
-	errno = 0;
-	if (nice(-16) == -1)
-		n_errno = errno;
 	drop_rights();
+	fprintf(stderr, _(
+		"\nUsage:\n"
+		"  clockdiff [options] <destination>\n"
+		"\nOptions:\n"
+		"                without -o, use icmp timestamp only (see RFC0792, page 16)\n"
+		"  -o            use ip timestamp and icmp echo\n"
+		"  -o1           use three-term ip timestamp and icmp echo\n"
+		"  -T, --time-format <ctime|iso>\n"
+		"                  specify display time format, ctime is the default\n"
+		"  -I            alias of --time-format=iso\n"
+		"  -h, --help    display this help\n"
+		"  -V, --version print version and exit\n"
+		"  <destination> dns name or ip address\n"
+		"\nFor more details see clockdiff(8).\n"));
+	exit(exit_status);
+}
 
-	if (argc == 3) {
-		if (strcmp(argv[1], "-o") == 0) {
-			ip_opt_len = 4 + 4*8;
-			argv++;
-		} else if (strcmp(argv[1], "-o1") == 0) {
-			ip_opt_len = 4 + 3*8;
-			argv++;
-		} else
-			usage();
-	} else if (argc != 2)
-		usage();
+static void parse_opts(struct run_state *ctl, int argc, char **argv)
+{
+	static const struct option longopts[] = {
+		{"time-format", required_argument, NULL, 'T'},
+		{"version", no_argument, NULL, 'V'},
+		{"help", no_argument, NULL, 'h'},
+		{NULL, 0, NULL, 0}
+	};
+	int c;
 
-	if (sock_raw < 0)  {
-		errno = s_errno;
-		perror("clockdiff: socket");
-		exit(1);
-	}
-
-	if (n_errno < 0) {
-		errno = n_errno;
-		perror("clockdiff: nice");
-		exit(1);
-	}
-
-	if (isatty(fileno(stdin)) && isatty(fileno(stdout)))
-		interactive = 1;
-
-	id = getpid();
-
-	(void)gethostname(hostname,sizeof(hostname));
-	status = getaddrinfo(hostname, NULL, &hints, &result);
-	if (status) {
-		fprintf(stderr, "clockdiff: %s: %s\n", hostname, gai_strerror(status));
-		exit(2);
-	}
-	myname = strdup(result->ai_canonname);
-	freeaddrinfo(result);
-
-	status = getaddrinfo(argv[1], NULL, &hints, &result);
-	if (status) {
-		fprintf(stderr, "clockdiff: %s: %s\n", argv[1], gai_strerror(status));
-		exit(1);
-	}
-	hisname = strdup(result->ai_canonname);
-
-	memcpy(&server, result->ai_addr, sizeof server);
-	freeaddrinfo(result);
-
-	if (connect(sock_raw, (struct sockaddr*)&server, sizeof(server)) == -1) {
-		perror("connect");
-		exit(1);
-	}
-	if (ip_opt_len) {
-		struct sockaddr_in myaddr;
-		socklen_t addrlen = sizeof(myaddr);
-		unsigned char rspace[ip_opt_len];
-
-		memset(rspace, 0, sizeof(rspace));
-		rspace[0] = IPOPT_TIMESTAMP;
-		rspace[1] = ip_opt_len;
-		rspace[2] = 5;
-		rspace[3] = IPOPT_TS_PRESPEC;
-		if (getsockname(sock_raw, (struct sockaddr*)&myaddr, &addrlen) == -1) {
-			perror("getsockname");
+	while ((c = getopt_long(argc, argv, "o1T:IVh", longopts, NULL)) != -1)
+		switch (c) {
+		case 'o':
+			ctl->ip_opt_len = 4 + 4 * 8;
+			break;
+		case '1':
+			ctl->ip_opt_len = 4 + 3 * 8;
+			break;
+		case 'T':
+			if (!strcmp(optarg, "iso"))
+				ctl->time_format = time_format_iso;
+			else if (!strcmp(optarg, "ctime"))
+				ctl->time_format = time_format_ctime;
+			else
+				error(1, 0, "invalid time-format argument: %s",
+				      optarg);
+			break;
+		case 'I':
+			ctl->time_format = time_format_iso;
+			break;
+		case 'V':
+			printf(IPUTILS_VERSION("clockdiff"));
+			exit(0);
+		case 'h':
+			usage(0);
+			abort();
+		default:
+			printf("Try '%s --help' for more information.\n",
+			       program_invocation_short_name);
 			exit(1);
 		}
-		((__u32*)(rspace+4))[0*2] = myaddr.sin_addr.s_addr;
-		((__u32*)(rspace+4))[1*2] = server.sin_addr.s_addr;
-		((__u32*)(rspace+4))[2*2] = myaddr.sin_addr.s_addr;
-		if (ip_opt_len == 4+4*8) {
-			((__u32*)(rspace+4))[2*2] = server.sin_addr.s_addr;
-			((__u32*)(rspace+4))[3*2] = myaddr.sin_addr.s_addr;
+}
+
+int main(int argc, char **argv)
+{
+	struct run_state ctl = {
+		.rtt = 1000,
+		.time_format = time_format_ctime
+	};
+	int measure_status;
+
+	struct addrinfo hints = {
+		.ai_family = AF_INET,
+		.ai_socktype = SOCK_RAW,
+		.ai_flags = AI_CANONNAME
+	};
+	struct addrinfo *result;
+	int status;
+
+	atexit(close_stdout);
+
+	parse_opts(&ctl, argc, argv);
+	argc -= optind;
+	argv += optind;
+	if (argc != 1)
+		usage(1);
+
+	ctl.sock_raw = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+	if (ctl.sock_raw < 0)
+		error(1, errno, "socket");
+	if (nice(-16) == -1)
+		error(1, errno, "nice");
+	drop_rights();
+
+	if (isatty(fileno(stdin)) && isatty(fileno(stdout)))
+		ctl.interactive = 1;
+
+	ctl.id = getpid();
+
+	status = getaddrinfo(argv[0], NULL, &hints, &result);
+	if (status)
+		error(1, 0, "%s: %s", argv[0], gai_strerror(status));
+	ctl.hisname = strdup(result->ai_canonname);
+
+	memcpy(&ctl.server, result->ai_addr, sizeof ctl.server);
+	freeaddrinfo(result);
+
+	if (connect(ctl.sock_raw, (struct sockaddr *)&ctl.server, sizeof(ctl.server)) == -1)
+		error(1, errno, "connect");
+	if (ctl.ip_opt_len) {
+		struct sockaddr_in myaddr = { 0 };
+		socklen_t addrlen = sizeof(myaddr);
+		uint8_t *rspace;
+
+		if ((rspace = calloc(ctl.ip_opt_len, sizeof(uint8_t))) == NULL)
+			error(1, errno, "allocating %zu bytes failed",
+					ctl.ip_opt_len * sizeof(uint8_t));
+		rspace[0] = IPOPT_TIMESTAMP;
+		rspace[1] = ctl.ip_opt_len;
+		rspace[2] = 5;
+		rspace[3] = IPOPT_TS_PRESPEC;
+		if (getsockname(ctl.sock_raw, (struct sockaddr *)&myaddr, &addrlen) == -1)
+			error(1, errno, "getsockname");
+		((uint32_t *) (rspace + 4))[0 * 2] = myaddr.sin_addr.s_addr;
+		((uint32_t *) (rspace + 4))[1 * 2] = ctl.server.sin_addr.s_addr;
+		((uint32_t *) (rspace + 4))[2 * 2] = myaddr.sin_addr.s_addr;
+		if (ctl.ip_opt_len == 4 + 4 * 8) {
+			((uint32_t *) (rspace + 4))[2 * 2] = ctl.server.sin_addr.s_addr;
+			((uint32_t *) (rspace + 4))[3 * 2] = myaddr.sin_addr.s_addr;
 		}
 
-		if (setsockopt(sock_raw, IPPROTO_IP, IP_OPTIONS, rspace, ip_opt_len) < 0) {
-			perror("ping: IP_OPTIONS (fallback to icmp tstamps)");
-			ip_opt_len = 0;
+		if (setsockopt(ctl.sock_raw, IPPROTO_IP, IP_OPTIONS, rspace, ctl.ip_opt_len) < 0) {
+			error(0, errno, "IP_OPTIONS (fallback to icmp tstamps)");
+			ctl.ip_opt_len = 0;
 		}
+		free(rspace);
 	}
 
-	if ((measure_status = (ip_opt_len ? measure_opt : measure)(&server)) < 0) {
+	measure_status = measure(&ctl);
+	if (measure_status < 0) {
 		if (errno)
-			perror("measure");
-		else
-			fprintf(stderr, "measure: unknown failure\n");
-		exit(1);
+			error(1, errno, "measure");
+		error(1, 0, _("measure: unknown failure"));
 	}
 
 	switch (measure_status) {
 	case HOSTDOWN:
-		fprintf(stderr, "%s is down\n", hisname);
-		exit(1);
+		error(1, 0, _("%s is down"), ctl.hisname);
+		break;
 	case NONSTDTIME:
-		fprintf(stderr, "%s time transmitted in a non-standard format\n", hisname);
-		exit(1);
+		error(1, 0, _("%s time transmitted in a non-standard format"), ctl.hisname);
+		break;
 	case UNREACHABLE:
-		fprintf(stderr, "%s is unreachable\n", hisname);
-		exit(1);
+		error(1, 0, _("%s is unreachable"), ctl.hisname);
+		break;
 	default:
 		break;
 	}
 
-
 	{
 		time_t now = time(NULL);
 
-		if (interactive)
-			printf("\nhost=%s rtt=%ld(%ld)ms/%ldms delta=%dms/%dms %s", hisname,
-			       rtt, rtt_sigma, min_rtt,
-			       measure_delta, measure_delta1,
-			       ctime(&now));
-		else
-			printf("%ld %d %d\n", now, measure_delta, measure_delta1);
+		if (ctl.interactive) {
+			char s[32];
+			struct tm tm;
+			localtime_r(&now, &tm);
+
+			if (ctl.time_format == time_format_iso) {
+				strftime(s, sizeof(s), "%Y-%m-%dT%H:%M:%S%z\n", &tm);
+			} else
+				strftime(s, sizeof(s), "%a %b %e %H:%M:%S %Y", &tm);
+			printf(_("\nhost=%s rtt=%ld(%ld)ms/%ldms delta=%dms/%dms %s"),
+				ctl.hisname, ctl.rtt, ctl.rtt_sigma, ctl.min_rtt,
+				ctl.measure_delta, ctl.measure_delta1, s);
+		} else
+			printf("%ld %d %d\n", now, ctl.measure_delta, ctl.measure_delta1);
 	}
 	exit(0);
 }

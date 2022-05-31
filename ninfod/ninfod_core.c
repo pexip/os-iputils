@@ -32,10 +32,6 @@
  * 	YOSHIFUJI Hideaki <yoshfuji@linux-ipv6.org>
  */
 
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -48,7 +44,7 @@
 #  include <stdlib.h>
 # endif
 #endif
-#if ENABLE_THREADS && HAVE_PTHREAD_H
+#if ENABLE_THREADS
 # include <pthread.h>
 #endif
 #if HAVE_STRING_H
@@ -105,28 +101,18 @@
 #if HAVE_SYSLOG_H
 # include <syslog.h>
 #endif
+#include <sys/wait.h>
 
+#include "iputils_common.h"
+#include "iputils_ni.h"
 #include "ninfod.h"
-
-#ifndef offsetof
-# define offsetof(aggregate,member)	((size_t)&((aggregate *)0)->member)
-#endif
-
-#define ARRAY_SIZE(a)		(sizeof(a) / sizeof(a[0]))
-
-/* ---------- */
-/* ID */
-static char *RCSID __attribute__ ((unused)) = "$USAGI: ninfod_core.c,v 1.29 2003-07-16 09:49:01 yoshfuji Exp $";
 
 /* Variables */
 int initialized = 0;
 
-#if ENABLE_THREADS && HAVE_LIBPTHREAD
+#if ENABLE_THREADS
 pthread_attr_t pattr;
 #endif
-
-static uint32_t suptypes[(MAX_SUPTYPES+31)>>5];
-static size_t suptypes_len;
 
 /* ---------- */
 struct subjinfo {
@@ -137,22 +123,19 @@ struct subjinfo {
 };
 
 static struct subjinfo subjinfo_table [] = {
-	[ICMP6_NI_SUBJ_IPV6] = {
-		.code = ICMP6_NI_SUBJ_IPV6,
+	[IPUTILS_NI_ICMP6_SUBJ_IPV6] = {
+		.code = IPUTILS_NI_ICMP6_SUBJ_IPV6,
 		.name = "IPv6",
-		//.init = init_nodeinfo_ipv6addr,
 		.checksubj = pr_nodeinfo_ipv6addr,
 	},
-	[ICMP6_NI_SUBJ_FQDN] = {
-		.code = ICMP6_NI_SUBJ_FQDN,
+	[IPUTILS_NI_ICMP6_SUBJ_FQDN] = {
+		.code = IPUTILS_NI_ICMP6_SUBJ_FQDN,
 		.name = "FQDN",
-		//.init = init_nodeinfo_nodename,
 		.checksubj = pr_nodeinfo_nodename,
 	},
-	[ICMP6_NI_SUBJ_IPV4] = {
-		.code = ICMP6_NI_SUBJ_IPV4,
+	[IPUTILS_NI_ICMP6_SUBJ_IPV4] = {
+		.code = IPUTILS_NI_ICMP6_SUBJ_IPV4,
 		.name = "IPv4",
-		//.init = init_nodeinfo_ipv4addr,
 		.checksubj = pr_nodeinfo_ipv4addr,
 	},
 };
@@ -162,7 +145,7 @@ static struct subjinfo subjinfo_null = {
 	.checksubj = pr_nodeinfo_noop,
 };
 
-static __inline__ struct subjinfo *subjinfo_lookup(int code)
+static __inline__ struct subjinfo *subjinfo_lookup(size_t code)
 {
 	if (code >= ARRAY_SIZE(subjinfo_table))
 		return NULL;
@@ -175,44 +158,36 @@ static __inline__ struct subjinfo *subjinfo_lookup(int code)
 #define QTYPEINFO_F_RATELIMIT	0x1
 
 struct qtypeinfo {
-	uint16_t qtype;
 	char	*name;
 	int	(*getreply)(CHECKANDFILL_ARGS);
 	void	(*init)(INIT_ARGS);
 	int	flags;
+	uint16_t qtype;
 };
 
 static struct qtypeinfo qtypeinfo_table[] = {
-	[NI_QTYPE_NOOP]		= {
-		.qtype = NI_QTYPE_NOOP,
+	[IPUTILS_NI_QTYPE_NOOP]		= {
+		.qtype = IPUTILS_NI_QTYPE_NOOP,
 		.name = "NOOP",
 		.getreply = pr_nodeinfo_noop,
 	},
-#if ENABLE_SUPTYPES
-	[NI_QTYPE_SUPTYPES]	= {
-		.qtype = NI_QTYPE_SUPTYPES,
-		.name = "SupTypes",
-		.getreply = pr_nodeinfo_suptypes,
-		.init = init_nodeinfo_suptypes,
-	},
-#endif
-	[NI_QTYPE_DNSNAME]	= {
-		.qtype = NI_QTYPE_DNSNAME,
+	[IPUTILS_NI_QTYPE_DNSNAME]	= {
+		.qtype = IPUTILS_NI_QTYPE_DNSNAME,
 		.name = "DnsName",
 		.getreply = pr_nodeinfo_nodename,
 		.init = init_nodeinfo_nodename,
 	},
-	[NI_QTYPE_NODEADDR]	= {
-		.qtype = NI_QTYPE_NODEADDR,
+	[IPUTILS_NI_QTYPE_IPV6ADDR]	= {
+		.qtype = IPUTILS_NI_QTYPE_IPV6ADDR,
 		.name = "NodeAddr",
 		.getreply = pr_nodeinfo_ipv6addr,
-		.init = init_nodeinfo_ipv6addr,
+		.init = init_nodeinfo,
 	},
-	[NI_QTYPE_IPV4ADDR]	= {
-		.qtype = NI_QTYPE_IPV4ADDR,
+	[IPUTILS_NI_QTYPE_IPV4ADDR]	= {
+		.qtype = IPUTILS_NI_QTYPE_IPV4ADDR,
 		.name = "IPv4Addr",
 		.getreply = pr_nodeinfo_ipv4addr,
-		.init = init_nodeinfo_ipv4addr,
+		.init = init_nodeinfo,
 	},
 };
 
@@ -228,7 +203,7 @@ static struct qtypeinfo qtypeinfo_refused = {
 	.flags = QTYPEINFO_F_RATELIMIT,
 };
 
-static __inline__ struct qtypeinfo *qtypeinfo_lookup(int qtype)
+static __inline__ struct qtypeinfo *qtypeinfo_lookup(size_t qtype)
 {
 	if (qtype >= ARRAY_SIZE(qtypeinfo_table))
 		return &qtypeinfo_unknown;
@@ -239,7 +214,7 @@ static __inline__ struct qtypeinfo *qtypeinfo_lookup(int qtype)
 
 /* ---------- */
 /* noop */
-int pr_nodeinfo_noop(CHECKANDFILL_ARGS)
+int pr_nodeinfo_noop(CHECKANDFILL_ARGS_3)
 {
 	DEBUG(LOG_DEBUG, "%s()\n", __func__);
 
@@ -251,10 +226,10 @@ int pr_nodeinfo_noop(CHECKANDFILL_ARGS)
 	}
 
 	if (reply) {
-		p->reply.ni_type = ICMP6_NI_REPLY;
-		p->reply.ni_code = ICMP6_NI_SUCCESS;
+		p->reply.ni_type = IPUTILS_NI_ICMP6_REPLY;
+		p->reply.ni_code = IPUTILS_NI_ICMP6_SUCCESS;
 		p->reply.ni_cksum = 0;
-		p->reply.ni_qtype = htons(NI_QTYPE_NOOP);
+		p->reply.ni_qtype = htons(IPUTILS_NI_QTYPE_NOOP);
 		p->reply.ni_flags = flags;
 	}
 
@@ -264,81 +239,16 @@ int pr_nodeinfo_noop(CHECKANDFILL_ARGS)
 	return 0;
 }
 
-#if ENABLE_SUPTYPES
-/* suptypes */
-int pr_nodeinfo_suptypes(CHECKANDFILL_ARGS)
-{
-	DEBUG(LOG_DEBUG, "%s()\n", __func__);
-
-	if (subjlen) {
-		DEBUG(LOG_WARNING, "%s(): invalid subject length(%zu)\n",
-		      __func__, subjlen);
-		return 1;
-	}
-
-	if (reply) {
-		p->reply.ni_type = ICMP6_NI_REPLY;
-		p->reply.ni_code = ICMP6_NI_SUCCESS;
-		p->reply.ni_cksum = 0;
-		p->reply.ni_qtype = htons(NI_QTYPE_SUPTYPES);
-		p->reply.ni_flags = flags&~NI_SUPTYPE_FLAG_COMPRESS;
-		
-		p->replydatalen = suptypes_len<<2;
-		p->replydata = ni_malloc(p->replydatalen);
-		if (p->replydata == NULL) {
-			p->replydatalen = -1;
-			return -1;	/*XXX*/
-		}
-
-		memcpy(p->replydata, suptypes, p->replydatalen);
-	}
-	return 0;
-}
-
-void init_nodeinfo_suptypes(INIT_ARGS)
-{
-	size_t w, b;
-	int i;
-
-	if (!forced && initialized)
-		return;
-
-	memset(suptypes, 0, sizeof(suptypes));
-	suptypes_len = 0;
-
-	for (i=0; i < ARRAY_SIZE(qtypeinfo_table); i++) {
-		unsigned short qtype;
-
-		if (qtypeinfo_table[i].name == NULL)
-			continue;
-		qtype = qtypeinfo_table[i].qtype;
-		w = qtype>>5;
-		b = qtype&0x1f;
-		if (w >= ARRAY_SIZE(suptypes)) {
-			/* This is programming error. */
-			DEBUG(LOG_ERR, "Warning: Too Large Supported Types\n");
-			exit(1);
-		}
-		suptypes[w] |= htonl(1<<b);
-
-		if (suptypes_len < w)
-			suptypes_len = w;
-	}
-	suptypes_len++;
-}
-#endif
-
 /* ---------- */
 /* unknown qtype response */
-int pr_nodeinfo_unknown(CHECKANDFILL_ARGS)
+int pr_nodeinfo_unknown(CHECKANDFILL_ARGS_1)
 {
 	if (!reply)
 		return -1;	/*???*/
 
-	p->reply.ni_type = ICMP6_NI_REPLY;
-	p->reply.ni_code = ICMP6_NI_UNKNOWN;
+	p->reply.ni_type = IPUTILS_NI_ICMP6_REPLY;
+	p->reply.ni_code = IPUTILS_NI_ICMP6_UNKNOWN;
 	p->reply.ni_cksum = 0;
-	//p->reply.ni_qtype = 0;
 	p->reply.ni_flags = flags;
 
 	p->replydata = NULL;
@@ -348,15 +258,14 @@ int pr_nodeinfo_unknown(CHECKANDFILL_ARGS)
 }
 
 /* refused response */
-int pr_nodeinfo_refused(CHECKANDFILL_ARGS)
+int pr_nodeinfo_refused(CHECKANDFILL_ARGS_1)
 {
 	if (!reply)
 		return -1;	/*???*/
 
-	p->reply.ni_type = ICMP6_NI_REPLY;
-	p->reply.ni_code = ICMP6_NI_REFUSED;
+	p->reply.ni_type = IPUTILS_NI_ICMP6_REPLY;
+	p->reply.ni_code = IPUTILS_NI_ICMP6_REFUSED;
 	p->reply.ni_cksum = 0;
-	//p->reply.ni_qtype = 0;
 	p->reply.ni_flags = flags;
 
 	p->replydata = NULL;
@@ -391,27 +300,13 @@ static int ni_policy(struct packetcontext *p)
 /* ---------- */
 void init_core(int forced)
 {
-	int i;
+	size_t i;
 
 	DEBUG(LOG_DEBUG, "%s()\n", __func__);
 
 	if (!initialized || forced) {
-		struct timeval tv;
-		unsigned int seed = 0;
-		pid_t pid;
-
-		if (gettimeofday(&tv, NULL) < 0) {
-			DEBUG(LOG_WARNING, "%s(): failed to gettimeofday()\n", __func__);
-		} else {
-			seed = (tv.tv_usec & 0xffffffff);
-		}
-
-		pid = getpid();
-		seed ^= (((unsigned long)pid) & 0xffffffff);
-
-		srand(seed);
-
-#if ENABLE_THREADS && HAVE_LIBPTHREAD
+		iputils_srand();
+#if ENABLE_THREADS
 		if (initialized)
 			pthread_attr_destroy(&pattr);
 
@@ -435,17 +330,21 @@ void init_core(int forced)
 	}
 
 	initialized = 1;
-
-	return;
 }
 
-#if ENABLE_THREADS && HAVE_LIBPTHREAD
+#if ENABLE_THREADS
 static void *ni_send_thread(void *data)
 {
+#if ENABLE_DEBUG
 	int ret;
+
 	DEBUG(LOG_DEBUG, "%s(): thread=%ld\n", __func__, pthread_self());
-	ret = ni_send(data);
+	ret =
+#endif
+	  ni_send(data);
+#if ENABLE_DEBUG
 	DEBUG(LOG_DEBUG, "%s(): thread=%ld => %d\n", __func__, pthread_self(), ret);
+#endif
 	return NULL;
 }
 #else
@@ -467,13 +366,13 @@ static int ni_send_fork(struct packetcontext *p)
 			      __func__, getpid(), ret);
 			exit(ret > 0 ? 1 : 0);
 		}
-		ni_free(p->replydata);
-		ni_free(p);
+		free(p->replydata);
+		free(p);
 		exit(0);
 	} else {
 		waitpid(child, NULL, 0);
-		ni_free(p->replydata);
-		ni_free(p);
+		free(p->replydata);
+		free(p);
 	}
 	return 0;
 }
@@ -481,26 +380,26 @@ static int ni_send_fork(struct packetcontext *p)
 
 static int ni_ratelimit(void)
 {
-	static struct timeval last;
-	struct timeval tv, sub;
+	static struct timespec last = { 0 };
+	struct timespec now, sub;
 
-	if (gettimeofday(&tv, NULL) < 0) {
-		DEBUG(LOG_WARNING, "%s(): gettimeofday(): %s\n",
+	if (clock_gettime(CLOCK_MONOTONIC, &now) < 0) {
+		DEBUG(LOG_WARNING, "%s(): clock_gettime(): %s\n",
 		      __func__, strerror(errno));
 		return -1;
 	}
 
-	if (!timerisset(&last)) {
-		last = tv;
+	if (!(last.tv_sec || last.tv_nsec)) {
+		last = now;
 		return 0;
 	}
 
-	timersub(&tv, &last, &sub);
+	timespecsub(&now, &last, &sub);
 
 	if (sub.tv_sec < 1)
 		return 1;
 
-	last = tv;
+	last = now;
 	return 0;
 }
 
@@ -519,7 +418,7 @@ int pr_nodeinfo(struct packetcontext *p)
 	int i;
 	char *cp;
 #endif
-#if ENABLE_THREADS && HAVE_PTHREAD_H
+#if ENABLE_THREADS
 	pthread_t thread;
 #endif
 	int rc;
@@ -532,33 +431,21 @@ int pr_nodeinfo(struct packetcontext *p)
 		if (!IN6_IS_ADDR_MC_LINKLOCAL(&p->pktinfo.ipi6_addr)) {
 			DEBUG(LOG_WARNING,
 			      "Destination is non-link-local multicast address.\n");
-			ni_free(p);
+			free(p);
 			return -1;
 		}
-#if 0
-		/* Do not discard NI Queries to multicast address
-		 * other than its own NI Group Address(es) by default.
-		 */
-		if (!check_nigroup(&p->pktinfo.ipi6_addr)) {
-			DEBUG(LOG_WARNING,
-			      "Destination is link-local multicast address other than "
-			      "NI Group address.\n");
-			ni_free(p);
-			return -1;
-		}
-#endif
 	}
 
 	/* Step 1: Check length */
 	if (p->querylen < sizeof(struct icmp6_nodeinfo)) {
 		DEBUG(LOG_WARNING, "Query too short\n");
-		ni_free(p);
+		free(p);
 		return -1;
 	}
 
 #if ENABLE_DEBUG
 	cp = printbuf;
-	for (i = 0; i < sizeof(query->icmp6_ni_nonce); i++) {
+	for (i = 0; (size_t)i < sizeof(query->icmp6_ni_nonce); i++) {
 		cp += sprintf(cp, " %02x", query->icmp6_ni_nonce[i]);
 	}
 	DEBUG(LOG_DEBUG, "%s(): qtype=%d, flags=0x%04x, nonce[] = {%s }\n",
@@ -570,9 +457,8 @@ int pr_nodeinfo(struct packetcontext *p)
 
 	/* Step 2: Check Subject Code */
 	switch(htons(query->ni_qtype)) {
-	case NI_QTYPE_NOOP:
-	case NI_QTYPE_SUPTYPES:
-		if (query->ni_code != ICMP6_NI_SUBJ_FQDN) {
+	case IPUTILS_NI_QTYPE_NOOP:
+		if (query->ni_code != IPUTILS_NI_ICMP6_SUBJ_FQDN) {
 			DEBUG(LOG_WARNING,
 			      "%s(): invalid/unknown code %u\n",
 			      __func__, query->ni_code);
@@ -586,7 +472,7 @@ int pr_nodeinfo(struct packetcontext *p)
 			DEBUG(LOG_WARNING,
 			      "%s(): unknown code %u\n",
 			      __func__, query->ni_code);
-			ni_free(p);
+			free(p);
 			return -1;
 		}
 	}
@@ -610,21 +496,16 @@ int pr_nodeinfo(struct packetcontext *p)
 			      "failed to make reply: %s\n",
 			      strerror(errno));
 		}
-		ni_free(p);
+		free(p);
 		return -1;
 	}
 
 	/* XXX: Step 5: Check the policy */
 	rc = ni_policy(p);
-	if (rc <= 0) {
-		ni_free(p->replydata);
+	if (rc == 0) {
+		free(p->replydata);
 		p->replydata = NULL;
 		p->replydatalen = 0;
-		if (rc < 0) {
-			DEBUG(LOG_WARNING, "Ignored by policy.\n");
-			ni_free(p);
-			return -1;
-		}
 		DEBUG(LOG_WARNING, "Refused by policy.\n");
 		replyonsubjcheck = 0;
 		qtypeinfo = &qtypeinfo_refused;
@@ -642,7 +523,7 @@ int pr_nodeinfo(struct packetcontext *p)
 				      "failed to make reply: %s\n",
 				      strerror(errno));
 			}
-			ni_free(p);
+			free(p);
 			return -1;
 		}
 	}
@@ -650,8 +531,8 @@ int pr_nodeinfo(struct packetcontext *p)
 	/* Step 7: Rate Limit */
 	if (qtypeinfo->flags&QTYPEINFO_F_RATELIMIT &&
 	    ni_ratelimit()) {
-		ni_free(p->replydata);
-		ni_free(p);
+		free(p->replydata);
+		free(p);
 		return -1;
 	}
 
@@ -677,18 +558,18 @@ int pr_nodeinfo(struct packetcontext *p)
 
 	/* Step 10: Send the reply
 	 * XXX: with possible random delay */
-#if ENABLE_THREADS && HAVE_LIBPTHREAD
+#if ENABLE_THREADS
 	/* ni_send_thread() frees p */
 	if (pthread_create(&thread, &pattr, ni_send_thread, p)) {
-		ni_free(p->replydata);
-		ni_free(p);
+		free(p->replydata);
+		free(p);
 		return -1;
 	}
 #else
 	/* ni_send_fork() frees p */
 	if (ni_send_fork(p)) {
-		ni_free(p->replydata);
-		ni_free(p);
+		free(p->replydata);
+		free(p);
 		return -1;
 	}
 #endif
