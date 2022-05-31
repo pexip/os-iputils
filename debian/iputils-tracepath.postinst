@@ -2,20 +2,22 @@
 
 set -e
 
+PROGRAM=$(dpkg-divert --truename /usr/bin/traceroute6.iputils)
+
 if [ "$1" = configure ]; then
 	update-alternatives \
-		--install /usr/bin/traceroute6 traceroute6 /usr/bin/traceroute6.iputils 100 \
+		--install /usr/bin/traceroute6 traceroute6 $PROGRAM 100 \
 		--slave /usr/share/man/man8/traceroute6.8.gz traceroute6.8.gz /usr/share/man/man8/traceroute6.iputils.8.gz
 	if command -v setcap > /dev/null; then
-		if setcap cap_net_raw+ep /usr/bin/traceroute6.iputils; then
-            chmod u-s /usr/bin/traceroute6.iputils
+		if setcap cap_net_raw+ep $PROGRAM; then
+            chmod u-s $PROGRAM
 		else
-			echo "Setcap failed on /usr/bin/traceroute6.iputils, falling back to setuid" >&2
-			chmod u+s /usr/bin/traceroute6.iputils
+			echo "Setcap failed on $PROGRAM, falling back to setuid" >&2
+			chmod u+s $PROGRAM
 		fi
 	else
 		echo "Setcap is not installed, falling back to setuid" >&2
-		chmod u+s /usr/bin/traceroute6.iputils
+		chmod u+s $PROGRAM
 	fi
 fi
 
