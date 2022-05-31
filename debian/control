@@ -7,7 +7,7 @@ Standards-Version: 4.1.4
 Build-Depends: debhelper (>= 7), xsltproc, docbook-xsl, libcap-dev, libssl1.0-dev, libidn2-dev, bash (>= 3)
 Vcs-Git: https://salsa.debian.org/debian/iputils.git
 Vcs-Browser: https://salsa.debian.org/debian/iputils
-XS-Pexip-Upstream: http://ftp.debian.org/debian/ buster
+XS-Pexip-Upstream: http://deb.debian.org/debian/ bullseye
 
 Package: iputils-ping
 Architecture: any
