@@ -1,3 +1,9 @@
+iputils (3:20210202-1pexip1) pexip; urgency=medium
+
+  * Initial bullseye build
+
+ -- Mark Hymers <mark.hymers@pexip.com>  Thu, 02 Jun 2022 14:42:19 +0100
+
 iputils (3:20210202-1) unstable; urgency=medium
 
   * New upstream version
