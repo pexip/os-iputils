@@ -1,3 +1,5 @@
+# Copyright (c) Iputils Project, 2017-2019
+
 manpages = []
 custom_man_xsl = files('custom-man.xsl')
 custom_html_xsl = files('custom-html.xsl')
@@ -14,28 +16,8 @@ if build_ping == true
 	manpages += ['ping']
 endif
 
-if build_rarpd == true
-	manpages += ['rarpd']
-endif
-
-if build_rdisc == true
-	manpages += ['rdisc']
-endif
-
-if build_tftpd == true
-	manpages += ['tftpd']
-endif
-
 if build_tracepath == true
 	manpages += ['tracepath']
-endif
-
-if build_traceroute6 == true
-	manpages += ['traceroute6']
-endif
-
-if build_ninfod == true
-	manpages += ['ninfod']
 endif
 
 xsltproc = find_program('xsltproc', required : build_mans or build_html_mans)
