@@ -10,7 +10,7 @@ Build-Depends: debhelper-compat (= 13), xsltproc, docbook-xsl,
 Vcs-Git: https://salsa.debian.org/debian/iputils.git
 Vcs-Browser: https://salsa.debian.org/debian/iputils
 Homepage: https://github.com/iputils/iputils/
-XS-Pexip-Upstream: http://deb.debian.org/debian/ bullseye
+XS-Pexip-Upstream: http://deb.debian.org/debian/ bookworm
 
 Package: iputils-ping
 Architecture: any
