@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio_ext.h>
@@ -79,8 +81,29 @@ long strtol_or_err(char const *const str, char const *const errmesg,
 	if (errno || str == end || (end && *end))
 		goto err;
 	if (num < min || max < num)
-		error(EXIT_FAILURE, 0, "%s: '%s': out of range: %lu <= value <= %lu",
+		error(EXIT_FAILURE, 0, "%s: '%s': out of range: %ld <= value <= %ld",
 		      errmesg, str,  min, max);
+	return num;
+ err:
+	error(EXIT_FAILURE, errno, "%s: '%s'", errmesg, str);
+	abort();
+}
+
+unsigned long strtoul_or_err(char const *const str, char const *const errmesg,
+		   const unsigned long min, const unsigned long max)
+{
+	unsigned long num;
+	char *end = NULL;
+
+	errno = 0;
+	if (str == NULL || *str == '\0')
+		goto err;
+	num = strtoul(str, &end, 10);
+	if (errno || str == end || (end && *end))
+		goto err;
+	if (num < min || max < num)
+		error(EXIT_FAILURE, 0, "%s: '%s': out of range: %lu <= value <= %lu",
+		      errmesg, str, min, max);
 	return num;
  err:
 	error(EXIT_FAILURE, errno, "%s: '%s'", errmesg, str);
@@ -137,4 +160,53 @@ void timespecsub(struct timespec *a, struct timespec *b, struct timespec *res)
 		res->tv_sec--;
 		res->tv_nsec += 1000000000L;
 	}
+}
+
+void print_config(void)
+{
+	printf(
+
+	"libcap: "
+#ifdef HAVE_LIBCAP
+	"yes"
+#else
+	"no"
+#endif
+
+	", IDN: "
+#ifdef USE_IDN
+	"yes"
+#else
+	"no"
+#endif
+
+	", NLS: "
+#ifdef ENABLE_NLS
+	"yes"
+#else
+	"no"
+#endif
+
+	", error.h: "
+#ifdef HAVE_ERROR_H
+	"yes"
+#else
+	"no"
+#endif
+
+	", getrandom(): "
+#ifdef HAVE_GETRANDOM
+	"yes"
+#else
+	"no"
+#endif
+
+	", __fpending(): "
+#ifdef HAVE___FPENDING
+	"yes"
+#else
+	"no"
+#endif
+
+	"\n");
 }

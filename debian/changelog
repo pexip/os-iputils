@@ -1,3 +1,18 @@
+iputils (3:20221126-1) unstable; urgency=medium
+
+  * New upstream version. See /usr/share/doc/iputils-*/changelog.gz for
+    detailed changes.
+
+ -- Noah Meyerhans <noahm@debian.org>  Sat, 26 Nov 2022 23:29:56 -0800
+
+iputils (3:20211215-1) unstable; urgency=medium
+
+  * New upstream release (Closes: #971044, #699238)
+  * Drop traceroute6 binary, which is no longer provided upstream
+  * Add iproute2 to build-deps for upstream tests
+
+ -- Noah Meyerhans <noahm@debian.org>  Fri, 04 Feb 2022 20:37:10 -0800
+
 iputils (3:20210202-1pexip3) pexip-bullseye; urgency=medium
 
   * Bullseye rebuild for ARM64 inclusion

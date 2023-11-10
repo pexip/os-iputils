@@ -1,6 +1,8 @@
+# Copyright (c) Iputils Project, 2017-2021
+
 inc = include_directories('..')
 
-executable('ping', [
+ping = executable('ping', [
 		'ping.c',
 		'ping_common.c',
 		'ping6_common.c',
