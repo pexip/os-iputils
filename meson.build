@@ -1,11 +1,13 @@
+# Copyright (c) Iputils Project, 2017-2021
+
 project('iputils', 'c',
 	default_options : [
 		'c_std=c99',
 		'warning_level=3',
 		'localstatedir=var',
 	],
-	meson_version : '>=0.39',
-	version : '20210202') # keep in sync with: git describe | awk -F- '{print $1}'
+	meson_version : '>=0.40',
+	version : '20221126') # keep in sync with: git describe | awk -F- '{print $1}'
 
 cc = meson.get_compiler('c')
 
@@ -17,22 +19,15 @@ add_project_arguments(
 
 conf = configuration_data()
 conf.set_quoted('PACKAGE_NAME', meson.project_name())
-conf.set('_GNU_SOURCE', 1, description : 'Enable GNU extensions on systems that have them.')
 
 build_arping = get_option('BUILD_ARPING')
 build_clockdiff = get_option('BUILD_CLOCKDIFF')
-build_ninfod = get_option('BUILD_NINFOD')
-nifold_messages = get_option('NINFOD_MESSAGES')
 build_ping = get_option('BUILD_PING')
-build_rarpd = get_option('BUILD_RARPD')
-build_rdisc = get_option('BUILD_RDISC')
-build_rdisc_server = get_option('ENABLE_RDISC_SERVER')
-build_tftpd = get_option('BUILD_TFTPD')
 build_tracepath = get_option('BUILD_TRACEPATH')
-build_traceroute6 = get_option('BUILD_TRACEROUTE6')
 
 build_mans = get_option('BUILD_MANS')
 build_html_mans = get_option('BUILD_HTML_MANS')
+run_tests = not get_option('SKIP_TESTS')
 
 prefix = get_option('prefix')
 bindir = join_paths(prefix, get_option('bindir'))
@@ -50,12 +45,10 @@ endif
 setcap_arping = false
 setcap_clockdiff = false
 setcap_ping = false
-setcap_traceroute6 = false
 if (not get_option('NO_SETCAP_OR_SUID'))
   setcap_arping = get_option('SETCAP_OR_SUID_ARPING')
   setcap_clockdiff = get_option('SETCAP_OR_SUID_CLOCKDIFF')
   setcap_ping = get_option('SETCAP_OR_SUID_PING')
-  setcap_traceroute6 = get_option('SETCAP_OR_SUID_TRACEROUTE6')
 endif
 
 # Check functions.
@@ -146,58 +139,6 @@ if host_machine.endian() == 'big'
 	conf.set('WORDS_BIGENDIAN', '1')
 endif
 
-if build_rdisc == true
-	if build_rdisc_server == true
-		conf.set('RDISC_SERVER', 1, description : 'If set build rdisc server.')
-	endif
-endif
-
-if build_ninfod == true
-	foreach h : [
-		'inttypes.h',
-		'limits.h',
-		'linux/rtnetlink.h',
-		'memory.h',
-		'netdb.h',
-		'netinet/icmp6.h',
-		'netinet/in.h',
-		'netinet/ip6.h',
-		'pwd.h',
-		'stdint.h',
-		'stdlib.h',
-		'string.h',
-		'strings.h',
-		'sys/capability.h',
-		'syslog.h',
-		'sys/time.h',
-		'sys/types.h',
-		'sys/uio.h',
-		'sys/utsname.h',
-		'unistd.h',
-	]
-		if cc.has_header(h)
-			conf.set('HAVE_' + h.to_upper().underscorify(), 1,
-				description : 'Define if ' + h + ' can be included.')
-		endif
-	endforeach
-	if cc.has_header('stdio.h') and cc.has_header('stdlib.h') and cc.has_header('stddef.h') and cc.has_header('stdarg.h')
-		conf.set('STDC_HEADERS', 1,
-			description : 'Define to 1 if you have the ANSI C header files.')
-	endif
-	threads = dependency('threads')
-	if threads.found()
-		conf.set('ENABLE_THREADS', 1,
-			description : 'Defined if libpthread is found.')
-	endif
-	if host_machine.endian() == 'big'
-		conf.set('WORDS_BIGENDIAN', 1,
-			description : 'Defined if processor stores words with the most significant byte first.')
-	endif
-	if nifold_messages == true
-		conf.set('ENABLE_DEBUG', 1, description : 'Enable ninfod syslog messages.')
-	endif
-endif
-
 foreach h : [
 	'error.h',
 ]
@@ -241,29 +182,14 @@ if build_ping == true
 endif
 
 if build_tracepath == true
-	executable('tracepath', ['tracepath.c', git_version_h],
+	tracepath = executable('tracepath', ['tracepath.c', git_version_h],
 		dependencies : [idn_dep, intl_dep],
 		link_with : [libcommon],
 		install: true)
 endif
 
-if build_traceroute6 == true
-	executable('traceroute6', ['traceroute6.c', git_version_h],
-		dependencies : [cap_dep, intl_dep, idn_dep],
-		link_with : [libcommon],
-		install: true)
-	if (setcap_traceroute6)
-		meson.add_install_script('build-aux/setcap-setuid.sh',
-			bindir,
-			'traceroute6',
-			perm_type,
-			setcap_path
-		)
-	endif
-endif
-
 if build_clockdiff == true
-	executable('clockdiff', ['clockdiff.c', git_version_h],
+	clockdiff = executable('clockdiff', ['clockdiff.c', git_version_h],
 		dependencies : [cap_dep, intl_dep],
 		link_with : [libcommon],
 		install: true)
@@ -277,25 +203,8 @@ if build_clockdiff == true
 	endif
 endif
 
-if build_rdisc == true
-	executable('rdisc', ['rdisc.c', git_version_h],
-		install_dir: sbindir,
-		link_with : [libcommon],
-		install: true)
-	if install_systemd_units
-		subs = configuration_data()
-		subs.set('sbindir', sbindir)
-		unit_file = configure_file(
-			input: 'systemd/rdisc.service.in',
-			output: 'rdisc.service',
-			configuration: subs
-		)
-		install_data(unit_file, install_dir: systemdunitdir)
-	endif
-endif
-
 if build_arping == true
-	executable('arping', ['arping.c', git_version_h],
+	arping = executable('arping', ['arping.c', git_version_h],
 		dependencies : [rt_dep, cap_dep, idn_dep, intl_dep],
 		link_with : [libcommon],
 		install: true)
@@ -309,33 +218,12 @@ if build_arping == true
 	endif
 endif
 
-if build_tftpd == true
-	subdir ('tftpd')
-endif
-
-if build_rarpd == true
-	executable('rarpd', ['rarpd.c', git_version_h],
-		install_dir: sbindir,
-		link_with : [libcommon],
-		install: true)
-	if install_systemd_units
-		subs = configuration_data()
-		subs.set('sbindir', sbindir)
-		unit_file = configure_file(
-			input: 'systemd/rarpd.service.in',
-			output: 'rarpd@.service',
-			configuration: subs
-		)
-		install_data(unit_file, install_dir: systemdunitdir)
-	endif
-endif
-
-if build_ninfod == true
-	subdir ('ninfod')
-endif
-
 if build_mans == true or build_html_mans == true
 	subdir ('doc')
+endif
+
+if run_tests
+	subdir('test')
 endif
 
 output = '\n\nAPPLICATIONS (build)\n'
@@ -345,23 +233,16 @@ output += 'arping: ' + build_arping.to_string()
 output += ' (capability or suid: ' + setcap_arping.to_string() + ')\n'
 output += 'clockdiff: ' + build_clockdiff.to_string()
 output += ' (capability or suid: ' + setcap_clockdiff.to_string() + ')\n'
-output += 'ninfod: ' + build_ninfod.to_string()
-output += ' (syslog: ' + nifold_messages.to_string() + ')\n'
 output += 'ping: ' + build_ping.to_string()
 output += ' (capability or suid: ' + setcap_ping.to_string() + ')\n'
-output += 'rarpd: ' + build_rarpd.to_string() + '\n'
-output += 'rdisc: ' + build_rdisc.to_string()
-output += ' (server: ' + build_rdisc_server.to_string() + ')\n'
-output += 'tftpd: ' + build_tftpd.to_string() + '\n'
 output += 'tracepath: ' + build_tracepath.to_string() + '\n'
-output += 'traceroute6: ' + build_traceroute6.to_string()
-output += ' (capability or suid: ' + setcap_traceroute6.to_string() + ')\n'
 
 output += '\nCONFIGURATION\n'
-output += 'Capatiblity (with libcap): ' + cap.to_string() + '\n'
+output += 'Capability (with libcap): ' + cap.to_string() + '\n'
 output += 'IDN (with libidn2): ' + idn.to_string() + '\n'
 output += 'I18N (with gettext): ' + gettext.to_string() + '\n'
 output += 'systemd: ' + install_systemd_units.to_string() + '\n'
+output += 'run tests: ' + run_tests.to_string() + '\n'
 
 output += '\nSYSTEM PATHS\n'
 output += 'prefix: ' + prefix + '\n'
@@ -371,7 +252,3 @@ output += 'sbindir: ' + sbindir + '\n'
 output += 'systemdunitdir: ' + systemdunitdir + '\n'
 
 message(output)
-
-############################################################
-# FIXME: write tests
-#test('ping to 127.0.0.1', p, args : ['-p 1', '127.0.0.1'])

@@ -10,6 +10,8 @@
  * 		YOSHIFUJI Hideaki <yoshfuji@linux-ipv6.org>
  */
 
+#define _GNU_SOURCE
+
 #include <arpa/inet.h>
 #include <errno.h>
 #include <ifaddrs.h>
@@ -36,6 +38,14 @@
 #endif
 
 #include "iputils_common.h"
+
+/*
+ * As of July 2021 AX.25 PID values are not currently defined in any
+ * userspace headers.
+ */
+#ifndef AX25_P_IP
+# define AX25_P_IP		0xcc	/* ARPA Internet Protocol     */
+#endif
 
 #ifdef DEFAULT_DEVICE
 # define DEFAULT_DEVICE_STR	DEFAULT_DEVICE
@@ -248,7 +258,17 @@ static int send_pack(struct run_state *ctl)
 	ah->ar_hrd = htons(ME->sll_hatype);
 	if (ah->ar_hrd == htons(ARPHRD_FDDI))
 		ah->ar_hrd = htons(ARPHRD_ETHER);
-	ah->ar_pro = htons(ETH_P_IP);
+
+	/*
+	 * Exceptions everywhere. AX.25 uses the AX.25 PID value not the
+	 * DIX code for the protocol. Make these device structure fields.
+	 */
+	if (ah->ar_hrd == htons(ARPHRD_AX25) ||
+	    ah->ar_hrd == htons(ARPHRD_NETROM))
+		ah->ar_pro = htons(AX25_P_IP);
+	else
+		ah->ar_pro = htons(ETH_P_IP);
+
 	ah->ar_hln = ME->sll_halen;
 	ah->ar_pln = 4;
 	ah->ar_op  = ctl->advert ? htons(ARPOP_REPLY) : htons(ARPOP_REQUEST);
@@ -341,9 +361,17 @@ static int recv_pack(struct run_state *ctl, unsigned char *buf, ssize_t len,
 	    (FROM->sll_hatype != ARPHRD_FDDI || ah->ar_hrd != htons(ARPHRD_ETHER)))
 		return 0;
 
-	/* Protocol must be IP. */
-	if (ah->ar_pro != htons(ETH_P_IP))
+	/*
+	 * Protocol must be IP - but exceptions everywhere. AX.25 and NETROM
+	 * use the AX.25 PID value not the DIX code for the protocol.
+	 */
+	if (ah->ar_hrd == htons(ARPHRD_AX25) ||
+	    ah->ar_hrd == htons(ARPHRD_NETROM)) {
+		if (ah->ar_pro != htons(AX25_P_IP))
+			return 0;
+	} else if (ah->ar_pro != htons(ETH_P_IP))
 		return 0;
+
 	if (ah->ar_pln != 4)
 		return 0;
 	if (ah->ar_hln != ((struct sockaddr_ll *)&ctl->me)->sll_halen)
@@ -733,7 +761,7 @@ static int event_loop(struct run_state *ctl)
 
 	/* timeout timerfd */
 	timeoutfd = timerfd_create(CLOCK_MONOTONIC, 0);
-	if (tfd == -1) {
+	if (timeoutfd == -1) {
 		error(0, errno, "timerfd_create failed");
 		return 1;
 	}
@@ -822,6 +850,8 @@ static int event_loop(struct run_state *ctl)
 	else if (ctl->dad && ctl->quit_on_reply)
 		/* Duplicate address detection mode return value */
 		rc |= !(ctl->brd_sent != ctl->received);
+	else if (ctl->timeout && !(ctl->count > 0))
+		rc |= !(ctl->received > 0);
 	else
 		rc |= (ctl->sent != ctl->received);
 	return rc;
@@ -888,6 +918,7 @@ int main(int argc, char **argv)
 			break;
 		case 'V':
 			printf(IPUTILS_VERSION("arping"));
+			print_config();
 			exit(0);
 		case 'h':
 		case '?':

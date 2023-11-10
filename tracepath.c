@@ -9,6 +9,8 @@
  * Authors:	Alexey Kuznetsov, <kuznet@ms2.inr.ac.ru>
  */
 
+#define _GNU_SOURCE
+
 #include <arpa/inet.h>
 #include <errno.h>
 #include <limits.h>
@@ -479,6 +481,7 @@ int main(int argc, char **argv)
 			break;
 		case 'V':
 			printf(IPUTILS_VERSION("tracepath"));
+			print_config();
 			return 0;
 		default:
 			usage();

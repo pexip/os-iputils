@@ -1,23 +1,22 @@
-# Japanese translation for iputils
-# Copyright (c) Jun Nishii <jun@vinelinux.org>, 2000
-# Copyright (c) Daisuke SUZUKI <daisuke@linux.or.jp>, 2004
-# Copyright (c) Tomohiro "Tomo-p" KATO <tomop@teamgedoh.net>, 2018-2021
-# Copyright (c) Iputils Project, 2020-2021
+# Czech translation for iputils
+# Copyright (c) Petr Pisar <ppisar@redhat.com>, 2021
+# Copyright (c) Iputils Project, 2021
+# This file is distributed under the same license as the iputils package.
 msgid ""
 msgstr ""
-"Project-Id-Version: iputils 20161105\n"
+"Project-Id-Version: iputils\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-22 16:21+0100\n"
-"PO-Revision-Date: 2022-02-13 02:16+0000\n"
-"Last-Translator: Takuro Onoue <kusanaginoturugi@gmail.com>\n"
-"Language-Team: Japanese <https://translate.fedoraproject.org/projects/"
-"iputils/iputils/ja/>\n"
-"Language: ja\n"
+"PO-Revision-Date: 2022-11-25 11:38+0000\n"
+"Last-Translator: Petr Vorel <petr.vorel@gmail.com>\n"
+"Language-Team: Czech <https://translate.fedoraproject.org/projects/iputils/"
+"iputils/cs/>\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 4.10.1\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Weblate 4.14.2\n"
 
 #: arping.c:123
 #, c-format
@@ -40,22 +39,21 @@ msgid ""
 "  -I <device>   which ethernet device to use"
 msgstr ""
 "\n"
-"Usage:\n"
-"  arping [オプション] <送信先>\n"
+"Použití:\n"
+"  arping [přepínače] <cíl>\n"
 "\n"
-"オプション:\n"
-"  -f                最初の応答で終了します\n"
-"  -q                表示を抑制します\n"
-"  -b                ブロードキャストパケットのみを使用し、ユニキャストに移行"
-"しません\n"
-"  -D                重複アドレス検出モード (DAD) で実行します\n"
-"  -U                ARP要求パケットを使用してARPキャッシュを更新します\n"
-"  -A                ARP応答パケットを使用してARPキャッシュを更新します\n"
-"  -V                バージョンを表示し終了します\n"
-"  -c <回数>         パケットを指定回数送信した後に終了します\n"
-"  -w <タイムアウト> 応答待ち時間を指定します\n"
-"  -i <間隔>         パケットの送信間隔を指定します (デフォルト: 1 秒)\n"
-"  -I <デバイス>     使用するイーサネットデバイスを指定します"
+"Přepínače:\n"
+"  -f            skončí s první odpovědí\n"
+"  -q            bude potichu\n"
+"  -b            pokračuje ve všesměrovém vysílání, žádný unicast\n"
+"  -D            režim zjišťování duplicitních adres\n"
+"  -U            režim nevyžádaného ARP, aktualizuje sousedy\n"
+"  -A            režim odpovědi ARP, aktualizuje sousedy\n"
+"  -V            vypíše verzi a skončí\n"
+"  -c <počet>    kolik paketů se má odeslat\n"
+"  -w <čas>      jak dlouho čekat na odpověď\n"
+"  -i <interval> nastaví interval mezi pakety (výchozí: 1 sekunda)\n"
+"  -I <zařízení> které ethernetové zařízení se použije"
 
 #: arping.c:142
 #, c-format
@@ -67,147 +65,144 @@ msgid ""
 "For more details see arping(8).\n"
 msgstr ""
 "\n"
-"  -s <送信元>  送信元IPアドレス\n"
-"  <送信先>       DNS名またはIPアドレス\n"
+"  -s <zdroj>    zdrojová IP adresa\n"
+"  <cíl>         doménové jméno nebo IP adresa\n"
 "\n"
-"詳細は arping(8) を参照してください。\n"
+"Podrobnosti naleznete v arping(8).\n"
 
 #: arping.c:305
 #, c-format
 msgid "Sent %d probes (%d broadcast(s))\n"
-msgstr "%d プローブを送信 (%d ブロードキャスト)\n"
+msgstr "Odesláno dotazů: %d (%d všesměrem)\n"
 
 #: arping.c:306
 #, c-format
 msgid "Received %d response(s)"
-msgstr "%d 応答を受信"
+msgstr "Přijato odpovědí: %d"
 
 #: arping.c:310
 #, c-format
 msgid "%d request(s)"
-msgstr "%d 要求"
+msgstr "%d požadavek(ů)"
 
 #: arping.c:312
 #, c-format
 msgid "%s%d broadcast(s)"
-msgstr "%s%d ブロードキャスト"
+msgstr "%s%d všesměrem"
 
 #: arping.c:415
 msgid "Unicast"
-msgstr "ユニキャスト"
+msgstr "Unicast"
 
 #: arping.c:415
 msgid "Broadcast"
-msgstr "ブロードキャスト"
+msgstr "Všesměr"
 
 #: arping.c:416
 #, c-format
 msgid "%s from "
-msgstr "%s 送信元 "
+msgstr "%s od "
 
 #: arping.c:416
 msgid "reply"
-msgstr "応答"
+msgstr "odpověď"
 
 #: arping.c:416
 msgid "request"
-msgstr "要求"
+msgstr "požadavek"
 
 #: arping.c:421
 #, c-format
 msgid "for %s "
-msgstr "送信先 %s "
+msgstr "pro %s "
 
 #: arping.c:426
 #, c-format
 msgid "for "
-msgstr "送信先 "
+msgstr "pro "
 
 #: arping.c:436
 #, c-format
 msgid " %ld.%03ldms\n"
-msgstr " %ld.%03ldミリ秒\n"
+msgstr " %ld,%03ld ms\n"
 
 #: arping.c:438
 #, c-format
 msgid " UNSOLICITED?\n"
-msgstr " 未承認?\n"
+msgstr " NEVYŽÁDANÝ?\n"
 
 #: arping.c:589
 #, c-format
 msgid "Interface \"%s\" is down\n"
-msgstr "インタフェース \"%s\" は停止しています\n"
+msgstr "Rozhraní „%s“ je vypnuté\n"
 
 #: arping.c:597
 #, c-format
 msgid "Interface \"%s\" is not ARPable\n"
-msgstr "インタフェース \"%s\" ではARPを利用できません\n"
+msgstr "Rozhraní „%s“ nepodporuje protokol ARP\n"
 
 #: arping.c:690
 #, c-format
 msgid "WARNING: using default broadcast address.\n"
-msgstr "警告: 既定のブロードキャストアドレスを使用しています。\n"
+msgstr "POZOR: používá se výchozí všesměrová adresa.\n"
 
 #: arping.c:902 arping.c:905 arping.c:908 ping/ping.c:372 ping/ping.c:419
 #: ping/ping.c:468 ping/ping.c:476 ping/ping.c:519 ping/ping.c:522
 #: ping/ping.c:525 ping/ping.c:539 tracepath.c:474 tracepath.c:477
 #: tracepath.c:480 tracepath.c:502
 msgid "invalid argument"
-msgstr "無効な引数です"
+msgstr "neplatný argument"
 
 #: arping.c:975
 #, c-format
 msgid "Device %s not available."
-msgstr "デバイス %s は使用不能です。"
+msgstr "Zařízení %s není dostupné."
 
 #: arping.c:976
 msgid "Suitable device could not be determined. Please, use option -I."
-msgstr ""
-"arping: 適切なデバイスを検出できませんでした。-I オプションを使用してくださ"
-"い。"
+msgstr "Vhodné zařízení nebylo možné určit. Prosím, použijte přepínač -I."
 
 #: arping.c:996
 msgid "WARNING: interface is ignored"
-msgstr "警告: インタフェースは無視されます"
+msgstr "POZOR: zařízení je ignorováno"
 
 #: arping.c:1015
 msgid "WARNING: setsockopt(SO_DONTROUTE)"
-msgstr "警告: setsockopt(SO_DONTROUTE)"
+msgstr "POZOR: setsockopt(SO_DONTROUTE)"
 
 #: arping.c:1039
 #, c-format
 msgid "Interface \"%s\" is not ARPable (no ll address)\n"
-msgstr ""
-"インタフェース \"%s\" ではARPを利用できません (llアドレスがありません)\n"
+msgstr "Zařízení „%s“ nepodporuje protokol ARP (chybí linková adresa)\n"
 
 #: arping.c:1048
 #, c-format
 msgid "ARPING %s "
-msgstr "ARPING %s "
+msgstr "ARPingá se %s "
 
 #: arping.c:1049
 #, c-format
 msgid "from %s %s\n"
-msgstr "送信元 %s %s\n"
+msgstr "od %s %s\n"
 
 #: arping.c:1053
 msgid "no source address in not-DAD mode"
-msgstr "非DADモードにおいてソースアドレスがありません"
+msgstr "žádná zdrojová adresa v režimu ne-DAD"
 
 #: clockdiff.c:242
 #, c-format
 msgid "Wrong timestamp %d\n"
-msgstr "%d は不正なタイムスタンプです\n"
+msgstr "Chybná časová značka %d\n"
 
 #: clockdiff.c:247
 #, c-format
 msgid "Overflow %d hops\n"
-msgstr "%d ホップを超過しました\n"
+msgstr "Přetečení %d skoků\n"
 
 #: clockdiff.c:272
 #, c-format
 msgid "wrong timestamps\n"
-msgstr "タイムスタンプが不正です\n"
+msgstr "chybná časová značka\n"
 
 #: clockdiff.c:453
 #, c-format
@@ -230,40 +225,41 @@ msgid ""
 "For more details see clockdiff(8).\n"
 msgstr ""
 "\n"
-"使用法:\n"
-"  clockdiff [オプション] <送信先>\n"
+"Použití:\n"
+"  clockdiff [přepínače] <cíl>\n"
 "\n"
-"オプション:\n"
-"                -oオプションがない場合、IPタイムスタンプのみを利用します。\n"
-"  -o            IPタイムスタンプとICMPエコーを使用します。\n"
-"  -o1           3項目のIPタイムスタンプとICMPエコーを使用します。\n"
+"Přepínače:\n"
+"                bez -o použít pouze ICMP časovou značku (viz str. 16 normy "
+"RFC0792)\n"
+"  -o            použít časovou značku IP a ICMP echo\n"
+"  -o1           použít třízáznamovou časovou značku IP a ICMP echo\n"
 "  -T, --time-format <ctime|iso>\n"
-"                  時刻表示形式を指定します, デフォルトはctimeです\n"
-"  -I            --time-format=isoのエイリアス\n"
-"  -h, --help    このヘルプを表示します\n"
-"  -V            バージョンを表示して終了します。\n"
-"  <送信先>      DNS名またはIPアドレス\n"
+"                určuje formát zobrazování času – výchozí je ctime\n"
+"  -I            stejné jako --time-format=iso\n"
+"  -h, --help    zobrazit tuto nápovědu\n"
+"  -V, --version zobrazit verzi a skončit\n"
+"  <cíl>         doménové jméno nebo IP adresa\n"
 "\n"
-"詳細は clockdiff(8) を参照してください。\n"
+"Podrobnosti naleznete v clockdiff(8).\n"
 
 #: clockdiff.c:592
 msgid "measure: unknown failure"
-msgstr "measure: 不明なエラーです"
+msgstr "měření: neznámá chyba"
 
 #: clockdiff.c:597
 #, c-format
 msgid "%s is down"
-msgstr "%s は停止しています"
+msgstr "%s je vypnutý"
 
 #: clockdiff.c:600
 #, c-format
 msgid "%s time transmitted in a non-standard format"
-msgstr "%sの時刻が非標準の形式で送信されました"
+msgstr "Čas %s byl přenesen v nestandardním tvaru"
 
 #: clockdiff.c:603
 #, c-format
 msgid "%s is unreachable"
-msgstr "%s へ到達できません"
+msgstr "%s není dostupný"
 
 #: clockdiff.c:622
 #, c-format
@@ -272,43 +268,40 @@ msgid ""
 "host=%s rtt=%ld(%ld)ms/%ldms delta=%dms/%dms %s\n"
 msgstr ""
 "\n"
-"host=%s rtt=%ld(%ld)ミリ秒/%ldミリ秒 delta=%dミリ秒/%dミリ秒 %s\n"
+"stroj=%s rtt=%ld (%ld) ms / %ld ms delta=%d ms / %d ms %s\n"
 
 #: ping/node_info.c:168
 #, c-format
 msgid "Qtype conflict\n"
-msgstr "問い合わせ種別が衝突しています\n"
+msgstr "Rozpor v typu dotazu\n"
 
 #: ping/node_info.c:220
 #, c-format
 msgid "Subject type conflict\n"
-msgstr "対象の種別が重複しています\n"
+msgstr "Rozpor v typu předmětu\n"
 
 #: ping/node_info.c:311
 #, c-format
 msgid "IDN encoding error: %s"
-msgstr "IDN エンコーディング失敗: %s"
+msgstr "Chyba kódování IDN: %s"
 
-#
 #: ping/node_info.c:322
 msgid "too long scope name"
-msgstr "スコープ名が長すぎます"
+msgstr "název síťové oblasti je příliš dlouhý"
 
-#
 #: ping/node_info.c:346 ping/node_info.c:388 ping/ping6_common.c:301
 #: ping/ping.c:506 ping/ping.c:570 ping/ping.c:996
 msgid "memory allocation failed"
-msgstr "メモリ確保に失敗しました"
+msgstr "nepodařilo se přidělit paměť"
 
 #: ping/node_info.c:358
 #, c-format
 msgid "inappropriate subject name: %s"
-msgstr "不適切な名前です: %s"
+msgstr "nevhodný název předmětu: %s"
 
-#
 #: ping/node_info.c:361
 msgid "dn_comp() returned too long result"
-msgstr "dn_comp()の結果が長すぎます"
+msgstr "funkce dn_comp() vrátila příliš dlouhý výsledek"
 
 #: ping/node_info.c:401
 #, c-format
@@ -332,10 +325,10 @@ msgid ""
 "  subject-name=name\n"
 "  subject-fqdn=name\n"
 msgstr ""
-"ping -6 -N <ノード情報 オプション>\n"
-"ヘルプ:\n"
+"ping -6 -N <volby údajů o uzlu>\n"
+"Nápověda:\n"
 "  help\n"
-"問い合わせ:\n"
+"Dotaz:\n"
 "  name\n"
 "  ipv6\n"
 "  ipv6-all\n"
@@ -345,278 +338,274 @@ msgstr ""
 "  ipv6-sitelocal\n"
 "  ipv4\n"
 "  ipv4-all\n"
-"対象:\n"
-"  subject-ipv6=addr\n"
-"  subject-ipv4=addr\n"
-"  subject-name=name\n"
-"  subject-fqdn=name\n"
+"Předmět:\n"
+"  subject-ipv6=adresa\n"
+"  subject-ipv4=adresa\n"
+"  subject-name=jméno\n"
+"  subject-fqdn=jméno\n"
 
 #: ping/ping6_common.c:99 ping/ping.c:697
 #, c-format
 msgid "unknown iface: %s"
-msgstr "不明なインタフェースです: %s"
+msgstr "neznámé rozhraní: %s"
 
-#
 #: ping/ping6_common.c:146
 msgid "scope discrepancy among the nodes"
-msgstr "ノード間のスコープが一致していません"
+msgstr "nejednotnost síťové oblasti mezi uzly"
 
 #: ping/ping6_common.c:222 ping/ping.c:858
 #, c-format
 msgid "Warning: source address might be selected on device other than: %s"
-msgstr "警告: ソースアドレスは %s 以外のデバイスから選択される可能性があります"
+msgstr "Pozor: zdrojová adresa může být vybrána na zařízením jiném než: %s"
 
 #: ping/ping6_common.c:262
 #, c-format
 msgid "multicast ping with too short interval: %d"
-msgstr "マルチキャストpingの間隔が短すぎます: %d"
+msgstr "multicastový ping s příliš krátkým intervalem: %d"
 
-#
 #: ping/ping6_common.c:265
 msgid "multicast ping does not fragment"
-msgstr "マルチキャストpingは断片化しません"
+msgstr "multicastový ping se nefragmentuje"
 
 #: ping/ping6_common.c:323
 msgid "setsockopt(RAW_CHECKSUM) failed - try to continue"
-msgstr "setsockopt(RAW_CHECKSUM) に失敗しました。再試行します"
+msgstr "volání setsockopt(RAW_CHECKSUM) selhalo – pokračuje se"
 
 #: ping/ping6_common.c:349
 msgid "can't disable multicast loopback"
-msgstr "マルチキャスト・ループバックを無効にできません"
+msgstr "příjem vlastních multicastových dotazů nelze zakázat"
 
 #: ping/ping6_common.c:354
 msgid "can't set multicast hop limit"
-msgstr "マルチキャスト・ホップ数の上限を設定できません"
+msgstr "omezení na počet skoků při multicastu nelze nastavit"
 
 #: ping/ping6_common.c:357
 msgid "can't set unicast hop limit"
-msgstr "ユニキャスト・ホップ数の上限を設定できません"
+msgstr "omezení na počet skoků při unicastu nelze nastavit"
 
 #: ping/ping6_common.c:369
 msgid "can't receive hop limit"
-msgstr "ホップ数の上限を設定できません"
+msgstr "nedaří se získat údaj o omezení počtu skoků"
 
 #: ping/ping6_common.c:374
 msgid "setsockopt(IPV6_TCLASS)"
 msgstr "setsockopt(IPV6_TCLASS)"
 
-#
 #: ping/ping6_common.c:376
 msgid "traffic class is not supported"
-msgstr "トラフィッククラスはサポートされていません"
+msgstr "třída provozu není podporována"
 
 #: ping/ping6_common.c:392
 msgid "can't set flowlabel"
-msgstr "フローラベルを設定できません"
+msgstr "jmenovku toku nelze nastavit"
 
 #: ping/ping6_common.c:396
 msgid "can't send flowinfo"
-msgstr "フロー情報を送信できません"
+msgstr "údaje o toku nelze poslat"
 
 #: ping/ping6_common.c:399
 #, c-format
 msgid "PING %s(%s) "
-msgstr "PING %s(%s) "
+msgstr "PING %s (%s) "
 
 #: ping/ping6_common.c:401
 #, c-format
 msgid ", flow 0x%05x, "
-msgstr ", フロー 0x%05x, "
+msgstr ", tok 0x%05x, "
 
 #: ping/ping6_common.c:406 ping/ping.c:1000
 #, c-format
 msgid "from %s %s: "
-msgstr "送信元 %s %s: "
+msgstr "od %s %s: "
 
 #: ping/ping6_common.c:409
 #, c-format
 msgid "%zu data bytes\n"
-msgstr "%zu データ長(byte)\n"
+msgstr "%zu datových bajtů\n"
 
 #: ping/ping6_common.c:424
 #, c-format
 msgid "Destination unreachable: "
-msgstr "目的地へ届きません: "
+msgstr "Cíl je nedostupný: "
 
 #: ping/ping6_common.c:427
 #, c-format
 msgid "No route"
-msgstr "経路がありません"
+msgstr "Chybí cesta k síti"
 
 #: ping/ping6_common.c:430
 #, c-format
 msgid "Administratively prohibited"
-msgstr "管理上禁止されています"
+msgstr "Zakázáno správcem"
 
 #: ping/ping6_common.c:433
 #, c-format
 msgid "Beyond scope of source address"
-msgstr "送信元アドレスのスコープ外です"
+msgstr "Mimo síťovou oblast zdrojové adresy"
 
 #: ping/ping6_common.c:436
 #, c-format
 msgid "Address unreachable"
-msgstr "アドレスに届きません"
+msgstr "Adresa není dostupná"
 
 #: ping/ping6_common.c:439
 #, c-format
 msgid "Port unreachable"
-msgstr "ポートに届きません"
+msgstr "Port nedosažitelný"
 
 #: ping/ping6_common.c:442
 #, c-format
 msgid "Unknown code %d"
-msgstr "未知のコード %d"
+msgstr "Neznámý kód %d"
 
 #: ping/ping6_common.c:447
 #, c-format
 msgid "Packet too big: mtu=%u"
-msgstr "パケットが大きすぎます: mtu=%u"
+msgstr "Paket je příliš velký: MTU=%u"
 
 #: ping/ping6_common.c:449
 #, c-format
 msgid ", code=%d"
-msgstr ", コード=%d"
+msgstr ", kód=%d"
 
 #: ping/ping6_common.c:452
 #, c-format
 msgid "Time exceeded: "
-msgstr "時間超過です: "
+msgstr "Překročen časový limit: "
 
 #: ping/ping6_common.c:454
 #, c-format
 msgid "Hop limit"
-msgstr "ホップの上限"
+msgstr "Příliš mnoho skoků"
 
 #: ping/ping6_common.c:456
 #, c-format
 msgid "Defragmentation failure"
-msgstr "断片化パケットの復元に失敗しました"
+msgstr "Selhání defragmentace"
 
 #: ping/ping6_common.c:458
 #, c-format
 msgid "code %d"
-msgstr "コード %d"
+msgstr "kód %d"
 
 #: ping/ping6_common.c:461
 #, c-format
 msgid "Parameter problem: "
-msgstr "パラメータの問題: "
+msgstr "Problém s parametrem: "
 
 #: ping/ping6_common.c:463
 #, c-format
 msgid "Wrong header field "
-msgstr "不正なヘッダフィールド "
+msgstr "Chybná položka hlavičky "
 
 #: ping/ping6_common.c:465
 #, c-format
 msgid "Unknown header "
-msgstr "未知のヘッダ "
+msgstr "Neznámá hlavička "
 
 #: ping/ping6_common.c:467
 #, c-format
 msgid "Unknown option "
-msgstr "不明なオプション "
+msgstr "Neznámá volba "
 
 #: ping/ping6_common.c:469
 #, c-format
 msgid "code %d "
-msgstr "コード %d "
+msgstr "kód %d "
 
 #: ping/ping6_common.c:470
 #, c-format
 msgid "at %u"
-msgstr "位置 %u"
+msgstr "na pozici %u"
 
 #: ping/ping6_common.c:473
 #, c-format
 msgid "Echo request"
-msgstr "エコー要求"
+msgstr "Požadavek na echo"
 
 #: ping/ping6_common.c:476
 #, c-format
 msgid "Echo reply"
-msgstr "エコー応答"
+msgstr "Odpověď na echo"
 
 #: ping/ping6_common.c:479
 #, c-format
 msgid "MLD Query"
-msgstr "マルチキャストグループ問い合わせ"
+msgstr "Dotaz MLD"
 
 #: ping/ping6_common.c:482
 #, c-format
 msgid "MLD Report"
-msgstr "マルチキャストグループ報告"
+msgstr "Hlášení MLD"
 
 #: ping/ping6_common.c:485
 #, c-format
 msgid "MLD Reduction"
-msgstr "マルチキャストグループ離脱"
+msgstr "Zkrácení MLD"
 
 #: ping/ping6_common.c:488
 #, c-format
 msgid "unknown icmp type: %u"
-msgstr "未知のicmpの種別です: %u"
+msgstr "neznámý typ ICMP: %u"
 
-#
 #: ping/ping6_common.c:542
 msgid "local error"
-msgstr "内部エラー"
+msgstr "místní chyba"
 
 #: ping/ping6_common.c:544
 #, c-format
 msgid "local error: message too long, mtu: %u"
-msgstr "内部エラー: メッセージが長すぎます: mtu=%u"
+msgstr "místní chyba: zpráva je příliš dlouhá, MTU: %u"
 
 #: ping/ping6_common.c:566 ping/ping.c:1453
 #, c-format
 msgid "From %s icmp_seq=%u "
-msgstr "送信元 %s icmp_seq=%u "
+msgstr "Od %s pořadí=%u "
 
 #: ping/ping6_common.c:673 ping/ping.c:1567
 #, c-format
 msgid " icmp_seq=%u"
-msgstr " icmp_seq=%u"
+msgstr " pořadí=%u"
 
 #: ping/ping6_common.c:697 ping/ping6_common.c:758
 #, c-format
 msgid " parse error (too short)"
-msgstr " 解析エラー (短すぎます)"
+msgstr " chyba rozboru (příliš krátké)"
 
 #: ping/ping6_common.c:711 ping/ping6_common.c:767
 #, c-format
 msgid " parse error (truncated)"
-msgstr " 解析エラー (切り詰められました)"
+msgstr " chyba rozboru (zkráceno)"
 
 #: ping/ping6_common.c:771
 #, c-format
 msgid " unexpected error in inet_ntop(%s)"
-msgstr " inet_ntop(%s) で予期せぬエラーが発生しました"
+msgstr " nečekaná chyba v inet_ntop(%s)"
 
 #: ping/ping6_common.c:780
 #, c-format
 msgid " (truncated)"
-msgstr " (切り詰められました)"
+msgstr " (zkráceno)"
 
 #: ping/ping6_common.c:799
 #, c-format
 msgid " unknown qtype(0x%02x)"
-msgstr " 未知の qtype (0x%02x)"
+msgstr " neznámý typ dotazu (0x%02x)"
 
 #: ping/ping6_common.c:803
 #, c-format
 msgid " refused"
-msgstr " 拒絶"
+msgstr " odmítnuto"
 
 #: ping/ping6_common.c:806
 #, c-format
 msgid " unknown"
-msgstr " 不明"
+msgstr " neznámý"
 
 #: ping/ping6_common.c:809
 #, c-format
 msgid " unknown code(%02x)"
-msgstr " 未知のコード(%02x)"
+msgstr " neznámý kód (%02x)"
 
 #: ping/ping6_common.c:811
 #, c-format
@@ -626,119 +615,114 @@ msgstr "; seq=%u;"
 #: ping/ping6_common.c:852
 #, c-format
 msgid "packet too short: %d bytes"
-msgstr "パケットが短すぎます: %d バイト"
+msgstr "paket je příliš krátký: %d bajtů"
 
 #: ping/ping6_common.c:919 ping/ping.c:1696
 #, c-format
 msgid "From %s: "
-msgstr "送信元 %s: "
+msgstr "Od %s: "
 
-#
 #: ping/ping6_common.c:960 ping/ping.c:1781
 msgid "WARNING: failed to install socket filter"
-msgstr "警告: ソケットフィルタのインストールに失敗しました"
+msgstr "POZOR: soketový filtr se nepodařilo nainstalovat"
 
 #: ping/ping.c:94 ping/ping.c:673
 #, c-format
 msgid "unknown protocol family: %d"
-msgstr "プロトコルファミリーが不明です: %d"
+msgstr "neznámá generace protokolu: %d"
 
 #: ping/ping.c:109
-#, fuzzy, c-format
+#, c-format
 msgid "unknown sock type: %d"
-msgstr "未知のicmpの種別です: %u"
+msgstr "neznámý typ ICMP: %d"
 
 #: ping/ping.c:196
 msgid "=> missing cap_net_raw+p capability or setuid?"
-msgstr ""
+msgstr "=> chybí cap_net_raw+p capability nebo setuid?"
 
 #: ping/ping.c:231
 #, c-format
 msgid "option argument contains garbage: %s"
-msgstr "オプション引数に間違ったデータが含まれています: %s"
+msgstr "argument přepínače obsahuje něco neplatného: %s"
 
 #: ping/ping.c:232
 msgid "this will become fatal error in the future"
-msgstr "これは将来致命的なエラーになるでしょう"
+msgstr "v budoucnu toto bude nepřekonatelná chyba"
 
 #: ping/ping.c:266
 #, c-format
 msgid "bad value for flowinfo: %s"
-msgstr "%s はフロー情報値として正しくありません"
+msgstr "chybná hodnota v údajích o toku: %s"
 
 #: ping/ping.c:269
 #, c-format
 msgid "flow value is greater than 20 bits: %s"
-msgstr "フロー値 %s は20ビットより大きいです"
+msgstr "hodnota toku se nevejde do 20 bitů: %s"
 
 #: ping/ping.c:291
 #, c-format
 msgid "bad TOS value: %s"
-msgstr "不適切なTOS値です: %s"
+msgstr "chybná hodnota ToS: %s"
 
 #: ping/ping.c:294
 #, c-format
 msgid "the decimal value of TOS bits must be in range 0-255: %d"
-msgstr "TOSビット %d は10進値で0-255でなければいけません"
+msgstr "je třeba, aby desítková hodnota bitů ToS byla z rozsahu 0 až 255: %d"
 
-#
 #: ping/ping.c:365 ping/ping.c:396
 msgid "only one -4 or -6 option may be specified"
-msgstr "-4 か -6 のどちらか一方のみを使うことができます"
+msgstr "není možné použít souběžně oba přepínače -4 a -6"
 
-#
 #: ping/ping.c:377 ping/ping.c:382
 msgid "only one of -T or -R may be used"
-msgstr "-T か -R のどちらか一方のみを使うことができます"
+msgstr "není možné použít souběžně oba přepínače -T a -R"
 
 #: ping/ping.c:391
 #, c-format
 msgid "invalid timestamp type: %s"
-msgstr "無効なタイムスタンプ種別です: %s"
+msgstr "neplatný druh časové značky: %s"
 
-#
 #: ping/ping.c:434
 msgid "bad timing interval"
-msgstr "不正な間隔です"
+msgstr "chybný časový interval"
 
 #: ping/ping.c:436
 #, c-format
 msgid "bad timing interval: %s"
-msgstr "は不正な間隔です: %s"
+msgstr "chybný časový interval: %s"
 
 #: ping/ping.c:447
 #, c-format
 msgid "cannot copy: %s"
-msgstr "コピーできません: %s"
+msgstr "nelze zkopírovat: %s"
 
 #: ping/ping.c:456
 #, c-format
 msgid "invalid source address: %s"
-msgstr "無効なソースアドレスです: %s"
+msgstr "neplatná zdrojová adresa: %s"
 
 #: ping/ping.c:470
 #, c-format
 msgid "cannot set preload to value greater than 3: %d"
-msgstr "preloadの値は 3 以上に設定できません: %d"
+msgstr "hodnotu přednačítání nelze nastavit na více jak 3: %d"
 
 #: ping/ping.c:487
 #, c-format
 msgid "invalid -M argument: %s"
-msgstr "不正な -M オプション値です: %s"
+msgstr "neplatný argument -M: %s"
 
-#
 #: ping/ping.c:545
 msgid "bad linger time"
-msgstr "応答待ち時間が正しくありません"
+msgstr "chybný čas čekání"
 
 #: ping/ping.c:547
 #, c-format
 msgid "bad linger time: %s"
-msgstr "応答待ち時間が正しくありません: %s"
+msgstr "chybný čas čekání: %s"
 
 #: ping/ping.c:585
 msgid "WARNING: ident 0 => forcing raw socket"
-msgstr ""
+msgstr "POZOR: ident 0 => vyžadován raw socket"
 
 #: ping/ping.c:641
 #, c-format
@@ -746,77 +730,72 @@ msgid ""
 "Warning: IPv6 link-local address on ICMP datagram socket may require ifname "
 "or scope-id => use: address%%<ifname|scope-id>"
 msgstr ""
+"Pozor: IPv6 link-local adresa u ICMP datagram socketu může vyžadovat ifname "
+"nebo scope-id => použijte: adresa%%<ifname|scope-id>"
 
-#
 #: ping/ping.c:809
 msgid "warning: QOS sockopts"
-msgstr "警告: QOSソケットオプションの設定エラーが発生しました"
+msgstr "pozor: QoS volby soketu"
 
-#
 #: ping/ping.c:821
 msgid ""
 "Do you want to ping broadcast? Then -b. If not, check your local firewall "
 "rules"
 msgstr ""
-"ブロードキャストpingを行う場合は -b オプション、違う場合はファイアウォールを"
-"確認してください"
+"Přejete si všesměrový ping? Pak použijte -b. Pokud ne, zkontrolujte pravidla "
+"místní brány firewall"
 
 #: ping/ping.c:822
 #, c-format
 msgid "WARNING: pinging broadcast address\n"
-msgstr "警告: ブロードキャストアドレスにpingしています\n"
+msgstr "POZOR: jedná se o ping na adresu všesměrového vysílání\n"
 
-#
 #: ping/ping.c:825 ping/ping.c:976
 msgid "cannot set broadcasting"
-msgstr "ブロードキャストを設定できません"
+msgstr "všesměr nelze nastavit"
 
-#
 #: ping/ping.c:846
 msgid "gatifaddrs failed"
-msgstr "gatifaddrsに失敗しました"
+msgstr "funkce getifaddrs nezafungovala"
 
 #: ping/ping.c:873
 #, c-format
 msgid "broadcast ping with too short interval: %d"
-msgstr "pingのブロードキャストの間隔が短すぎます: %d"
+msgstr "všesměrový ping s příliš krátkým intervalem: %d"
 
-#
 #: ping/ping.c:875
 msgid "broadcast ping does not fragment"
-msgstr "ブロードキャストpingパケットは断片化しません"
+msgstr "všesměrový ping se nefragmentuje"
 
 #: ping/ping.c:904
 msgid "WARNING: setsockopt(ICMP_FILTER)"
-msgstr "警告: setsockopt(ICMP_FILTER)"
+msgstr "POZOR: setsockopt(ICMP_FILTER)"
 
-#
 #: ping/ping.c:909
 msgid "WARNING: your kernel is veeery old. No problems."
-msgstr "警告: kernelが非常に古いです。問題ありません。"
+msgstr ""
+"POZOR: jádro vámi používaného systému je ale opravdu staré verze. Nicméně "
+"zatím žádné problémy."
 
 #: ping/ping.c:913
 msgid "WARNING: setsockopt(IP_RECVTTL)"
-msgstr "警告: setsockopt(IP_RECVTTL)"
+msgstr "POZOR: setsockopt(IP_RECVTTL)"
 
 #: ping/ping.c:915
 msgid "WARNING: setsockopt(IP_RETOPTS)"
-msgstr "警告: setsockopt(IP_RETOPTS)"
+msgstr "POZOR: setsockopt(IP_RETOPTS)"
 
-#
 #: ping/ping.c:982
 msgid "cannot disable multicast loopback"
-msgstr "マルチキャスト・ループバックを無効にできません"
+msgstr "příjem vlastních multicastových dotazů nelze zakázat"
 
-#
 #: ping/ping.c:987
 msgid "cannot set multicast time-to-live"
-msgstr "マルチキャストTTLを設定できません"
+msgstr "délku životnosti nelze u multicastu nastavit"
 
-#
 #: ping/ping.c:989
 msgid "cannot set unicast time-to-live"
-msgstr "ユニキャストTTLを設定できません"
+msgstr "délku životnosti nelze u unicastu nastavit"
 
 #: ping/ping.c:998
 #, c-format
@@ -826,7 +805,7 @@ msgstr "PING %s (%s) "
 #: ping/ping.c:1001
 #, c-format
 msgid "%zu(%zu) bytes of data.\n"
-msgstr "%zu(%zu) バイトのデータ\n"
+msgstr "%zu (%zu) datových bajtů.\n"
 
 #: ping/ping.c:1033
 #, c-format
@@ -849,7 +828,7 @@ msgstr ""
 #: ping/ping.c:1082
 #, c-format
 msgid "\t(same route)"
-msgstr "\t(同一経路)"
+msgstr "\t(stejná trasa)"
 
 #: ping/ping.c:1087
 #, c-format
@@ -872,22 +851,22 @@ msgstr ""
 #: ping/ping.c:1155
 #, c-format
 msgid "\t%ld absolute not-standard"
-msgstr ""
+msgstr "\t%ld absolutní, nestandardní"
 
 #: ping/ping.c:1157
 #, c-format
 msgid "\t%ld not-standard"
-msgstr ""
+msgstr "\t%ld nestandardní"
 
 #: ping/ping.c:1161
 #, c-format
 msgid "\t%ld absolute"
-msgstr ""
+msgstr "\t%ld absolutní"
 
 #: ping/ping.c:1172
 #, c-format
 msgid "Unrecorded hops: %d\n"
-msgstr "記録されていないホップ数: %d\n"
+msgstr "Nezaznamenané skoky: %d\n"
 
 #: ping/ping.c:1176
 #, c-format
@@ -896,12 +875,12 @@ msgid ""
 "unknown option %x"
 msgstr ""
 "\n"
-"%x は不明なオプションです"
+"neznámá volba %x"
 
 #: ping/ping.c:1196
 #, c-format
 msgid "Vr HL TOS  Len   ID Flg  off TTL Pro  cks      Src      Dst Data\n"
-msgstr ""
+msgstr "Vr HL ToS  Dél   ID Pří  vyp TTL Pro  ksč      Zdr      Cíl Data\n"
 
 #: ping/ping.c:1197
 #, c-format
@@ -921,323 +900,323 @@ msgstr "  %02x  %02x %04x"
 #: ping/ping.c:1217
 #, c-format
 msgid "Echo Reply\n"
-msgstr "エコー応答\n"
+msgstr "Odpověď na echo\n"
 
 #: ping/ping.c:1223
 #, c-format
 msgid "Destination Net Unreachable\n"
-msgstr "目的のネットワークへ届きません。\n"
+msgstr "Cílová síť nedostupná\n"
 
 #: ping/ping.c:1226
 #, c-format
 msgid "Destination Host Unreachable\n"
-msgstr "目的のホストへ届きません。\n"
+msgstr "Cílový stroj nedostupný\n"
 
 #: ping/ping.c:1229
 #, c-format
 msgid "Destination Protocol Unreachable\n"
-msgstr "目的のプロトコルへ届きません。\n"
+msgstr "Cílový protokol nedostupný\n"
 
 #: ping/ping.c:1232
 #, c-format
 msgid "Destination Port Unreachable\n"
-msgstr "目的のポートへ届きません。\n"
+msgstr "Cílový port nedostupný\n"
 
 #: ping/ping.c:1235
 #, c-format
 msgid "Frag needed and DF set (mtu = %u)\n"
-msgstr "断片化が必要ですがDFフラグがセットされています (mtu = %u)。\n"
+msgstr "Potřeba fragmentace, ale DF je nastaveno (MTU = %u)\n"
 
 #: ping/ping.c:1238
 #, c-format
 msgid "Source Route Failed\n"
-msgstr "ソースルーティングに失敗しました。\n"
+msgstr "Zdrojová trasa nezafungovala\n"
 
 #: ping/ping.c:1241
 #, c-format
 msgid "Destination Net Unknown\n"
-msgstr "目的のネットワークが不明です。\n"
+msgstr "Cílová síť není známa\n"
 
 #: ping/ping.c:1244
 #, c-format
 msgid "Destination Host Unknown\n"
-msgstr "目的のホストが不明です。\n"
+msgstr "Cílový stroj není znám\n"
 
 #: ping/ping.c:1247
 #, c-format
 msgid "Source Host Isolated\n"
-msgstr "送信元ホストが孤立しています。\n"
+msgstr "Zdrojový stroj je izolován\n"
 
 #: ping/ping.c:1250
 #, c-format
 msgid "Destination Net Prohibited\n"
-msgstr "目的のネットワークは禁止されています。\n"
+msgstr "Cílová síť je zakázána\n"
 
 #: ping/ping.c:1253
 #, c-format
 msgid "Destination Host Prohibited\n"
-msgstr "目的のホストは禁止されています。\n"
+msgstr "Cílový stroj je zakázán\n"
 
 #: ping/ping.c:1256
 #, c-format
 msgid "Destination Net Unreachable for Type of Service\n"
-msgstr "このtosでは目的のネットワークへ届きません。\n"
+msgstr "Cílový síť není pro daný typ služby dostupná\n"
 
 #: ping/ping.c:1259
 #, c-format
 msgid "Destination Host Unreachable for Type of Service\n"
-msgstr "このtosでは目的のホストへ届きません。\n"
+msgstr "Cílový stroj není pro daný typ služby dostupný\n"
 
 #: ping/ping.c:1262
 #, c-format
 msgid "Packet filtered\n"
-msgstr "パケットがフィルタリングされました。\n"
+msgstr "Paket odfiltrován\n"
 
 #: ping/ping.c:1265
 #, c-format
 msgid "Precedence Violation\n"
-msgstr "優先度違反\n"
+msgstr "Porušuje přednost\n"
 
 #: ping/ping.c:1268
 #, c-format
 msgid "Precedence Cutoff\n"
-msgstr "優先度に基づく遮断\n"
+msgstr "Nedostatečná přednost\n"
 
 #: ping/ping.c:1271
 #, c-format
 msgid "Dest Unreachable, Bad Code: %d\n"
-msgstr "目的サイトへ届きません, 不正なコード: %d\n"
+msgstr "Cíl nedostupný, chybný kód: %d\n"
 
 #: ping/ping.c:1278
 #, c-format
 msgid "Source Quench\n"
-msgstr "発信抑制\n"
+msgstr "Útlum zdroje\n"
 
 #: ping/ping.c:1285
 #, c-format
 msgid "Redirect Network"
-msgstr "ネットワークのリダイレクト"
+msgstr "Přesměrování sítě"
 
 #: ping/ping.c:1288
 #, c-format
 msgid "Redirect Host"
-msgstr "ホストのリダイレクト"
+msgstr "Přesměrování stroje"
 
 #: ping/ping.c:1291
 #, c-format
 msgid "Redirect Type of Service and Network"
-msgstr "TOSのためのネットワークリダイレクト"
+msgstr "Přesměrování druhu služby a sítě"
 
 #: ping/ping.c:1294
 #, c-format
 msgid "Redirect Type of Service and Host"
-msgstr "TOSのためのホストリダイレクト"
+msgstr "Přesměrování druhu služby a stroje"
 
 #: ping/ping.c:1297
 #, c-format
 msgid "Redirect, Bad Code: %d"
-msgstr "リダイレクト, 不正なコード: %d"
+msgstr "Přesměrování, chybný kód: %d"
 
 #: ping/ping.c:1308
 #, c-format
 msgid "(New nexthop: %s)\n"
-msgstr "(新しい次ホップ: %s)\n"
+msgstr "(Nový následující skok: %s)\n"
 
 #: ping/ping.c:1314
 #, c-format
 msgid "Echo Request\n"
-msgstr "エコー要求\n"
+msgstr "Požadavek na echo\n"
 
 #: ping/ping.c:1320
 #, c-format
 msgid "Time to live exceeded\n"
-msgstr "TTLを超過しました。\n"
+msgstr "Překročena doba životnosti\n"
 
 #: ping/ping.c:1323
 #, c-format
 msgid "Frag reassembly time exceeded\n"
-msgstr "断片化パケットの再構築時間を超過しました。\n"
+msgstr "Překročena doba pro provedení opětovného složení fragmentů\n"
 
 #: ping/ping.c:1326
 #, c-format
 msgid "Time exceeded, Bad Code: %d\n"
-msgstr "時間超過です。不正なコード: %d\n"
+msgstr "Překročen čas, chybný kód: %d\n"
 
 #: ping/ping.c:1333
 #, c-format
 msgid "Parameter problem: pointer = %u\n"
-msgstr "パラメータの問題: ポインタ = %u\n"
+msgstr "Problém s parametrem: ukazatel = %u\n"
 
 #: ping/ping.c:1339
 #, c-format
 msgid "Timestamp\n"
-msgstr "タイムスタンプ\n"
+msgstr "Časová značka\n"
 
 #: ping/ping.c:1343
 #, c-format
 msgid "Timestamp Reply\n"
-msgstr "タイムスタンプ応答\n"
+msgstr "Odpověď s časovou značkou\n"
 
 #: ping/ping.c:1347
 #, c-format
 msgid "Information Request\n"
-msgstr "情報要求\n"
+msgstr "Dotaz na informace\n"
 
 #: ping/ping.c:1351
 #, c-format
 msgid "Information Reply\n"
-msgstr "情報応答\n"
+msgstr "Odpověď s informacemi\n"
 
 #: ping/ping.c:1356
 #, c-format
 msgid "Address Mask Request\n"
-msgstr "アドレスマスク要求\n"
+msgstr "Dotaz na masku adresy\n"
 
 #: ping/ping.c:1361
 #, c-format
 msgid "Address Mask Reply\n"
-msgstr "アドレスマスク応答\n"
+msgstr "Odpověď s maskou adresy\n"
 
 #: ping/ping.c:1365
 #, c-format
 msgid "Bad ICMP type: %d\n"
-msgstr "不正なICMP種別です: %d\n"
+msgstr "Chybný typ ICMP: %d\n"
 
 #: ping/ping.c:1417
 #, c-format
 msgid "local error: %s"
-msgstr "内部エラー: %s"
+msgstr "místní chyba: %s"
 
 #: ping/ping.c:1419
 #, c-format
 msgid "local error: message too long, mtu=%u"
-msgstr "内部エラー: メッセージが長すぎます: mtu=%u"
+msgstr "místní chyba: zpráva je příliš dlouhá, MTU=%u"
 
 #: ping/ping.c:1592
 #, c-format
 msgid "packet too short (%d bytes) from %s"
-msgstr "パケットが短すぎます (%d バイト)。送信元 %s"
+msgstr "paket od %s je příliš krátký (%d bajtů)"
 
 #: ping/ping.c:1671
 #, c-format
 msgid "From %s: icmp_seq=%u "
-msgstr "送信元 %s: icmp_seq=%u "
+msgstr "Od %s: pořadí=%u "
 
 #: ping/ping.c:1674
 #, c-format
 msgid "(BAD CHECKSUM)"
-msgstr "(チェックサム異常)"
+msgstr "(CHYBNÝ KONTROLNÍ SOUČET)"
 
 #: ping/ping.c:1698
 #, c-format
 msgid "(BAD CHECKSUM)\n"
-msgstr "(チェックサム異常)\n"
+msgstr "(CHYBNÝ KONTROLNÍ SOUČET)\n"
 
 #: ping/ping_common.c:215
 #, c-format
 msgid "patterns must be specified as hex digits: %s"
-msgstr "パターン値 %s は16進数値でなければなりません"
+msgstr "vzory je třeba zadávat jako šestnáctkové číslice: %s"
 
 #: ping/ping_common.c:232
 #, c-format
 msgid "PATTERN: 0x"
-msgstr "パターン: 0x"
+msgstr "VZOR: 0x"
 
 #: ping/ping_common.c:352
 #, c-format
 msgid "no answer yet for icmp_seq=%lu\n"
-msgstr "icmp_seq=%lu が未応答です\n"
+msgstr "žádná odpověď pro pořadí=%lu\n"
 
-#
 #: ping/ping_common.c:452
 msgid "WARNING: probably, rcvbuf is not enough to hold preload"
-msgstr "警告: おそらく preload のために充分な受信バッファがありません"
+msgstr ""
+"POZOR: vyrovnávací paměť příjmu pravděpodobně není dost velká, aby pojala "
+"přednačítané"
 
 #: ping/ping_common.c:469
-#, fuzzy, c-format
+#, c-format
 msgid "WARNING: failed to set mark: %u"
-msgstr "警告: マーク %d の設定に失敗しました"
+msgstr "Pozor: Značku se nepodařilo nastavit: %u"
 
 #: ping/ping_common.c:471
 msgid "WARNING: SO_MARK not supported"
-msgstr "警告: SO_MARKはサポートされていません"
+msgstr "Pozor: SO_MARK není podporováno"
 
 #: ping/ping_common.c:487
 #, c-format
 msgid "cannot flood; minimal interval allowed for user is %dms"
-msgstr "ping floodはできません。インターバルの最低値は %d ミリ秒です"
+msgstr ""
+"prevence zahlcování – uživatelům bez práva správy přístupné pouze intervaly "
+"delší než %d ms"
 
 #: ping/ping_common.c:490
 #, c-format
 msgid "illegal preload and/or interval: %d"
-msgstr "preloadまたはintervalの値 %d が不正です"
+msgstr "neplatné přednačtení nebo interval: %d"
 
-#
 #: ping/ping_common.c:502
 msgid "Warning: no SO_TIMESTAMP support, falling back to SIOCGSTAMP"
-msgstr ""
-"警告: SO_TIMESTAMPはサポートされていないため、SIOCGSTAMPにフォールバックしま"
-"す"
+msgstr "Pozor: SO_TIMESTAMP není podporováno, přechází se na SIOCGSTAMP"
 
 #: ping/ping_common.c:746
 #, c-format
 msgid "Warning: time of day goes back (%ldus), taking countermeasures"
-msgstr "警告: 時刻が巻き戻りました (%ldus)。対策を行います"
+msgstr "Pozor: čas se vrátil zpět (%ld µs), přijímají se protiopatření"
 
 #: ping/ping_common.c:796
 #, c-format
 msgid "%d bytes from %s:"
-msgstr "%d バイト応答 送信元 %s:"
+msgstr "%d bajtů od %s:"
 
 #: ping/ping_common.c:802
 #, c-format
 msgid " ident=%d"
-msgstr ""
+msgstr " ident=%d"
 
 #: ping/ping_common.c:805
 #, c-format
 msgid " ttl=%d"
-msgstr " ttl=%d"
+msgstr " TTL=%d"
 
 #: ping/ping_common.c:808
 #, c-format
 msgid " (truncated)\n"
-msgstr " (切り詰められました)\n"
+msgstr " (zkráceno)\n"
 
 #: ping/ping_common.c:813
 #, c-format
 msgid " time=%ld ms"
-msgstr " 時間=%ld ミリ秒"
+msgstr " čas=%ld ms"
 
 #: ping/ping_common.c:815
 #, c-format
 msgid " time=%ld.%01ld ms"
-msgstr " 時間=%ld.%01ldミリ秒"
+msgstr " čas=%ld,%01ld ms"
 
 #: ping/ping_common.c:818
 #, c-format
 msgid " time=%ld.%02ld ms"
-msgstr " 時間=%ld.%02ldミリ秒"
+msgstr " čas=%ld,%02ld ms"
 
 #: ping/ping_common.c:821
 #, c-format
 msgid " time=%ld.%03ld ms"
-msgstr " 時間=%ld.%03ldミリ秒"
+msgstr " čas=%ld,%03ld ms"
 
 #: ping/ping_common.c:826
 #, c-format
 msgid " (DUP!)"
-msgstr " (重複!)"
+msgstr " (DUPL!)"
 
 #: ping/ping_common.c:828
 #, c-format
 msgid " (BAD CHECKSUM!)"
-msgstr " (チェックサム異常!)"
+msgstr " (CHYBNÝ KONTROLNÍ SOUČET!)"
 
 #: ping/ping_common.c:830
 #, c-format
 msgid " (DIFFERENT ADDRESS!)"
-msgstr " (アドレス相違!)"
+msgstr " (ODLIŠNÁ ADRESA!)"
 
 #: ping/ping_common.c:837
 #, c-format
@@ -1246,73 +1225,72 @@ msgid ""
 "wrong data byte #%zu should be 0x%x but was 0x%x"
 msgstr ""
 "\n"
-"誤りデータバイト #%zu. 正しい値: 0x%x 返り値: 0x%x"
+"nesprávná data na bajtu č. %zu – měla by být 0x%x, ale jsou 0x%x"
 
 #: ping/ping_common.c:880
 #, c-format
 msgid "--- %s ping statistics ---\n"
-msgstr "--- %s ping 統計 ---\n"
+msgstr "--- Statistika pingů na %s ---\n"
 
 #: ping/ping_common.c:881
 #, c-format
 msgid "%ld packets transmitted, "
-msgstr "送信パケット数 %ld, "
+msgstr "%ld paketů odesláno, "
 
 #: ping/ping_common.c:882
 #, c-format
 msgid "%ld received"
-msgstr "受信パケット数 %ld"
+msgstr "%ld přijato"
 
 #: ping/ping_common.c:884
 #, c-format
 msgid ", +%ld duplicates"
-msgstr ", +%ld 重複"
+msgstr ", +%ld duplikátů"
 
 #: ping/ping_common.c:886
 #, c-format
 msgid ", +%ld corrupted"
-msgstr ", +%ld 破損"
+msgstr ", +%ld poškozených"
 
 #: ping/ping_common.c:888
 #, c-format
 msgid ", +%ld errors"
-msgstr ", +%ld エラー"
+msgstr ", +%ld chyb"
 
 #: ping/ping_common.c:894
 #, c-format
 msgid ", %g%% packet loss"
-msgstr ", パケット損失 %g%%"
+msgstr ", %g%% ztráta paketů"
 
 #: ping/ping_common.c:896
 #, c-format
 msgid ", time %ldms"
-msgstr ", 時間 %ldミリ秒"
+msgstr ", čas %ld ms"
 
 #: ping/ping_common.c:916
 #, c-format
 msgid "rtt min/avg/max/mdev = %ld.%03ld/%lu.%03ld/%ld.%03ld/%ld.%03ld ms"
-msgstr ""
-"rtt 最小/平均/最大/mdev = %ld.%03ld/%lu.%03ld/%ld.%03ld/%ld.%03ldミリ秒"
+msgstr "RTT min/prům/max/std.odch = %ld,%03ld/%lu,%03ld/%ld,%03ld/%ld,%03ld ms"
 
 #: ping/ping_common.c:924
 #, c-format
 msgid "%spipe %d"
-msgstr "%spipe %d"
+msgstr "%sroura %d"
 
 #: ping/ping_common.c:931
 #, c-format
 msgid "%sipg/ewma %d.%03d/%d.%03d ms"
-msgstr "%sipg/ewma %d.%03d/%d.%03dミリ秒"
+msgstr "%sIPG/klouz.prům %d,%03d/%d,%03d ms"
 
 #: ping/ping_common.c:949
 #, c-format
 msgid "%ld/%ld packets, %d%% loss"
-msgstr "%ld/%ld パケット, パケット損失 %d%%"
+msgstr "%ld/%ld paketů, %d%% ztráta"
 
 #: ping/ping_common.c:954
 #, c-format
 msgid ", min/avg/ewma/max = %ld.%03ld/%lu.%03ld/%d.%03d/%ld.%03ld ms"
-msgstr ", 最小/平均/ewma/最大 = %ld.%03ld/%lu.%03ld/%d.%03d/%ld.%03ldミリ秒"
+msgstr ", min/prům/klouz.prům/max = %ld,%03ld/%lu,%03ld/%d,%03d/%ld,%03ld ms"
 
 #: tracepath.c:217
 #, c-format
@@ -1335,7 +1313,7 @@ msgstr ""
 #: tracepath.c:234
 #, c-format
 msgid "no info\n"
-msgstr "情報なし\n"
+msgstr "žádné údaje\n"
 
 #: tracepath.c:238
 msgid "[LOCALHOST]"
@@ -1344,41 +1322,41 @@ msgstr "[LOCALHOST]"
 #: tracepath.c:286
 #, c-format
 msgid "%3ld.%03ldms "
-msgstr "%3ld.%03ldミリ秒 "
+msgstr "%3ld,%03ld ms "
 
 #: tracepath.c:289
 #, c-format
 msgid "(This broken router returned corrupted payload) "
-msgstr "(不完全なルーターが破損したデータを返しました) "
+msgstr "(Tento rozbitý směrovač vrátil poškozená data) "
 
 #: tracepath.c:304
 #, c-format
 msgid "pmtu %d\n"
-msgstr "pmtu %d\n"
+msgstr "PMTU %d\n"
 
 #: tracepath.c:309
 #, c-format
 msgid "reached\n"
-msgstr "到達しました\n"
+msgstr "dosaženo\n"
 
 #: tracepath.c:325 tracepath.c:328
 #, c-format
 msgid "asymm %2d "
-msgstr "asymm %2d "
+msgstr "asym. %2d "
 
 #: tracepath.c:343
 msgid "NET ERROR"
-msgstr "ネットワークエラー"
+msgstr "CHYBA SÍTĚ"
 
 #: tracepath.c:388
 #, c-format
 msgid "%2d?: reply received 8)\n"
-msgstr "%2d?: 応答受信 8)\n"
+msgstr "%2d?: přijata odpověď 8)\n"
 
 #: tracepath.c:394
 #, c-format
 msgid "%2d:  send failed\n"
-msgstr "%2d:  送信失敗\n"
+msgstr "%2d: odeslání se nezdařilo\n"
 
 #: tracepath.c:401
 #, c-format
@@ -1401,206 +1379,126 @@ msgid ""
 "For more details see tracepath(8).\n"
 msgstr ""
 "\n"
-"Usage\n"
-"  tracepath [オプション] <送信先>\n"
+"Použití\n"
+"  tracepath [přepínače] <cíl>\n"
 "\n"
-"オプション:\n"
-"  -4             IPv4を使用します。\n"
-"  -6             IPv6を使用します。\n"
-"  -b             ホスト名とIPアドレスの両方を表示します。\n"
-"  -l <サイズ>    パケット長を指定します。\n"
-"  -m <ホップ>    最大ホップ数を指定します。\n"
-"  -n             DNS名前解決を行いません。\n"
-"  -p <ポート>    送信先ポートを指定します。\n"
-"  -V             バージョンを表示して終了します。\n"
-"  <送信先>       DNS名またはIPアドレス\n"
+"Přepínače:\n"
+"  -4             použít IPv4\n"
+"  -6             použít IPv6\n"
+"  -b             vypsat jak jméno, tak IP adresu\n"
+"  -l <délka>     použít paket o <délce>\n"
+"  -m <skoky>     použít nejvýše <skoků>\n"
+"  -n             nepřekládat doménová jména\n"
+"  -p <port>      použít cílový <port>\n"
+"  -V             vypsat verzi a ukončit\n"
+"  <cíl>          doménové jméno nebo IP adresa\n"
 "\n"
-"詳細は tracepath(8) を参照してください。\n"
+"Podrobnosti naleznete v manuálu tracepath(8).\n"
 
-#
 #: tracepath.c:459 tracepath.c:464
 msgid "Only one -4 or -6 option may be specified"
-msgstr "-4 か -6 のどちらか一方のみを使うことができます"
+msgstr "Není možné použít souběžně oba přepínače -4 a -6"
 
 #: tracepath.c:606
 #, c-format
 msgid "%2d:  no reply\n"
-msgstr "%2d:  応答なし\n"
+msgstr "%2d: žádná odpověď\n"
 
 #: tracepath.c:613
 #, c-format
 msgid "     Resume: pmtu %d "
-msgstr "     要約: pmtu %d "
+msgstr "     Obnoveno: PMTU %d "
 
 #: tracepath.c:615
 #, c-format
 msgid "hops %d "
-msgstr "ホップ数 %d "
+msgstr "skoků %d "
 
 #: tracepath.c:617
 #, c-format
 msgid "back %d "
-msgstr "戻りホップ数 %d "
+msgstr "zpět %d "
 
 #: tracepath.c:622
 #, c-format
 msgid "pktlen must be within: %d < value <= %d"
-msgstr "エラー: pktlenは %d < pktlen <= %d の範囲内でなければいけません"
+msgstr "Je třeba, aby délka paketu byla z rozmezí: %d < hodnota <= %d"
 
-#, fuzzy
 #~ msgid "unknown interface"
-#~ msgstr "不明なインタフェースです: %s"
-
-#, c-format
-#~ msgid "arping: too many interfaces!?\n"
-#~ msgstr "arping: インタフェースが多すぎます!?\n"
-
-#, c-format
-#~ msgid "arping: invalid source %s\n"
-#~ msgstr "arping: %s は無効なソースアドレスです。\n"
-
-#~ msgid "ping: IP_OPTIONS (fallback to icmp tstamps)"
-#~ msgstr "ping: IP_OPTIONS (icmp tstampsにフォールバックします)"
-
-#, c-format
-#~ msgid "bad number of packets to transmit: %ld"
-#~ msgstr "不正な送信パケットサイズです: %ld"
-
-#, c-format
-#~ msgid "bad preload value: %s, should be 1..%d"
-#~ msgstr "%s は不正なpreloadの値です。1〜%d である必要があります"
-
-#, c-format
-#~ msgid "mark cannot be negative: %s"
-#~ msgstr "mark %s は負数にできません"
-
-#, c-format
-#~ msgid "illegal packet size: %d"
-#~ msgstr "不正なパケットサイズです: %d"
-
-#, c-format
-#~ msgid "packet size too large: %d"
-#~ msgstr "パケットサイズ %d は大きすぎます"
-
-#, c-format
-#~ msgid "bad sndbuf value: %s"
-#~ msgstr "sndbuf の値が正しくありません: %s"
-
-#, c-format
-#~ msgid "ttl out of range: %s"
-#~ msgstr "TTLが範囲を超えています: %s"
-
-#, c-format
-#~ msgid "bad wait time: %s"
-#~ msgstr "終了待ち時間が正しくありません: %s"
-
-#, c-format
-#~ msgid "packet size %d is too large. Maximum is %d"
-#~ msgstr "パケットサイズ %d が大きすぎます。最大値は %d です"
-
-#
-#~ msgid "flow labels are not supported"
-#~ msgstr "フローラベルはサポートされていません"
-
-#
-#~ msgid "flowinfo is not supported"
-#~ msgstr "フロー情報はサポートされていません"
-
-#, c-format
-#~ msgid "tracepath: Only one -4 or -6 option may be specified\n"
-#~ msgstr "tracepath: -4 か -6 のどちらか一方のみを使うことができます。\n"
-
-#, c-format
-#~ msgid "Error: pktlen must be > %d and <= %d.\n"
-#~ msgstr "エラー: pktlenは %d < pktlen <= %d の範囲内でなければいけません。\n"
-
-#, c-format
-#~ msgid "Error: max hops must be 0 .. %d (inclusive).\n"
-#~ msgstr "エラー: 最大ホップ数は 0〜%d(含む) です。\n"
+#~ msgstr "neznámé rozhraní"
 
 #, c-format
 #~ msgid "traceroute: wrote %s %d chars, ret=%d\n"
-#~ msgstr "traceroute: 送信先 %s へ %d 文字送信。結果: %d\n"
+#~ msgstr "traceroute: zapsáno %s %d znaků, vráceno=%d\n"
 
 #~ msgid "Error"
-#~ msgstr "エラー"
+#~ msgstr "Chyba"
 
-#
 #~ msgid "Destination Unreachable"
-#~ msgstr "目的地へ届きません"
+#~ msgstr "Cíl není dostupný"
 
-#
 #~ msgid "Packet Too Big"
-#~ msgstr "パケットが大きすぎます"
+#~ msgstr "Paket je příliš velký"
 
 #~ msgid "Time Exceeded in Transit"
-#~ msgstr "通信中に時間を超過しました"
+#~ msgstr "Překročen čas přenosu"
 
-#
 #~ msgid "Parameter Problem"
-#~ msgstr "パラメータの問題"
+#~ msgstr "Problém s parametrem"
 
-#
 #~ msgid "Echo Request"
-#~ msgstr "エコー要求"
+#~ msgstr "Požadavek na echo"
 
-#
 #~ msgid "Echo Reply"
-#~ msgstr "エコー応答"
+#~ msgstr "Odpověď echa"
 
 #~ msgid "Membership Query"
-#~ msgstr "マルチキャストグループ照会"
+#~ msgstr "Dotaz na členství"
 
 #~ msgid "Membership Report"
-#~ msgstr "マルチキャストグループ報告"
+#~ msgstr "Hlášeno o členství"
 
-#
 #~ msgid "Membership Reduction"
-#~ msgstr "マルチキャストグループ離脱"
+#~ msgstr "Snížení členství"
 
 #~ msgid "Router Solicitation"
-#~ msgstr "ルータ要請"
+#~ msgstr "Vyžádání směrovače"
 
 #~ msgid "Router Advertisement"
-#~ msgstr "ルータ広告"
+#~ msgstr "Ohlášení směrovače"
 
 #~ msgid "Neighbor Solicitation"
-#~ msgstr "近隣者要請"
+#~ msgstr "Vyžádání souseda"
 
 #~ msgid "Neighbor Advertisement"
-#~ msgstr "近隣者広告"
+#~ msgstr "Ohlášení souseda"
 
-#
 #~ msgid "Redirect"
-#~ msgstr "リダイレクト"
+#~ msgstr "Přesměrování"
 
-#
 #~ msgid "Neighbor Query"
-#~ msgstr "近隣者照会"
+#~ msgstr "Dotaz na souseda"
 
-#
-#
 #~ msgid "Neighbor Reply"
-#~ msgstr "近隣者応答"
+#~ msgstr "Odpověď souseda"
 
 #~ msgid "Multicast Listener Report packet"
-#~ msgstr "マルチキャストリスナー応答"
+#~ msgstr "Paket s hlášením posluchače multicastu"
 
 #~ msgid "Home Agent Address Discovery Request Message"
-#~ msgstr "ホームエージェント探索要求メッセージ"
+#~ msgstr "Zpráva s požadavkem na objevení adresy domácího agenta"
 
 #~ msgid "Home Agent Address Discovery Reply message"
-#~ msgstr "ホームエージェント探索応答メッセージ"
+#~ msgstr "Zpráva s odpovědí na objevení adresy domácího agenta"
 
-#
 #~ msgid "Mobile Prefix Solicitation Message"
-#~ msgstr "モバイルプレフィクス要請"
+#~ msgstr "Zpráva s vyžádáním mobilního prefixu"
 
 #~ msgid "Mobile Prefix Solicitation Advertisement"
-#~ msgstr "モバイルプレフィクス広告"
+#~ msgstr "Ohlášení mobilního prefixu"
 
 #~ msgid "OUT-OF-RANGE"
-#~ msgstr "範囲外"
+#~ msgstr "MIMO ROZSAH"
 
 #, c-format
 #~ msgid ""
@@ -1618,69 +1516,53 @@ msgstr "エラー: pktlenは %d < pktlen <= %d の範囲内でなければいけ
 #~ "  -r            use SO_DONTROUTE socket option\n"
 #~ "  -s <address>  use source <address>\n"
 #~ "  -v            verbose output\n"
+#~ "  -V            print version and exit\n"
 #~ "  -w <timeout>  time to wait for response\n"
 #~ "\n"
 #~ "For more details see traceroute6(8).\n"
 #~ msgstr ""
 #~ "\n"
-#~ "Usage:\n"
-#~ "  traceroute6 [オプション] <送信先>\n"
+#~ "Použití:\n"
+#~ "  traceroute6 [přepínače] <cíl>\n"
 #~ "\n"
-#~ "オプション:\n"
-#~ "  -d                 SO_DEBUG ソケットオプションを使用します。\n"
-#~ "  -i <デバイス>      使用するデバイスを指定します。\n"
-#~ "  -m <ホップ>        最大ホップ数を指定します。\n"
-#~ "  -n                 DNS名前解決を行いません。\n"
-#~ "  -p <ポート>        送信先ポートを指定します。\n"
-#~ "  -q <nprobes>       ホップあたりのプローブ回数を指定します。\n"
-#~ "  -r                 SO_DONTROUTE ソケットオプションを使用します。\n"
-#~ "  -s <IPアドレス>    送信元IPアドレスを指定します。\n"
-#~ "  -v                 冗長表示を行います。\n"
-#~ "  -w <タイムアウト>  応答待ち時間を指定します。\n"
+#~ "Přepínače:\n"
+#~ "  -d            použije volbu socketu SO_DEBUG\n"
+#~ "  -i <zařízení> přilepí se na <zařízení>\n"
+#~ "  -m <skoky>    použije nejvýše <skoků>\n"
+#~ "  -n            žádný překlad doménových jmen\n"
+#~ "  -p <port>     použije cílový <port>\n"
+#~ "  -q <počet>    počet pokusů\n"
+#~ "  -r            použije volbu socketu SO_DONTROUTE\n"
+#~ "  -s <adresa>   použije zdrojovou <adresu>\n"
+#~ "  -v            podrobný výstup\n"
+#~ "  -V            vypíše verzi a skončí\n"
+#~ "  -w <čas>      doba, jakou se čeká na odpověď\n"
 #~ "\n"
-#~ "詳細は traceroute6(8)を参照してください。\n"
+#~ "Podrobnosti naleznete v manuálu traceroute6(8).\n"
 
-#, c-format
-#~ msgid "traceroute: max ttl must be >1.\n"
-#~ msgstr "traceroute: 最大TTLは1より大きくなければいけません。\n"
-
-#, c-format
-#~ msgid "traceroute: port must be >0.\n"
-#~ msgstr "traceroute: ポートは0より大きくなければいけません。\n"
-
-#, c-format
-#~ msgid "traceroute: nprobes must be >0.\n"
-#~ msgstr "traceroute: nprobesは0より大きくなければいけません。\n"
-
-#, c-format
-#~ msgid "traceroute: wait must be >1 sec.\n"
-#~ msgstr "traceroute: 待ち時間は1秒より大きくなければいけません。\n"
-
-#, c-format
-#~ msgid "traceroute: packet size must be %d <= s < %d.\n"
-#~ msgstr ""
-#~ "traceroute: パケットサイズは %d <= s < %d の範囲内でなければいけません。\n"
-
-#, c-format
-#~ msgid "malloc failed\n"
-#~ msgstr "メモリ確保に失敗しました。\n"
+#~ msgid "wait must be >1 sec"
+#~ msgstr "doba čekání musí být větší než 1 sekunda"
 
 #, c-format
 #~ msgid "setsockopt(RAW_CHECKSUM) failed - try to continue."
-#~ msgstr "setsockopt(RAW_CHECKSUM) に失敗しました。再試行します。"
+#~ msgstr "volání setsockopt(RAW_CHECKSUM) selhalo – zkusí se pokračovat."
 
 #, c-format
-#~ msgid "traceroute: unknown addr %s\n"
-#~ msgstr "traceroute: %s は不明なアドレスです。\n"
+#~ msgid "unknown addr %s"
+#~ msgstr "neznámá adresa %s"
+
+#, c-format
+#~ msgid "traceroute to %s (%s)"
+#~ msgstr "trasování cesty k %s (%s)"
 
 #, c-format
 #~ msgid " from %s"
-#~ msgstr " 送信元 %s"
+#~ msgstr " z %s"
 
 #, c-format
 #~ msgid ", %d hops max, %d byte packets\n"
-#~ msgstr ", 最大 %d ホップ, %d バイトパケット\n"
+#~ msgstr ", %d maximum skoků, %dbajtové pakety\n"
 
 #, c-format
 #~ msgid "  %.4f ms"
-#~ msgstr "  %.4f ミリ秒"
+#~ msgstr "  %.4f ms"
