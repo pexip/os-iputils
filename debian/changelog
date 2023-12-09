@@ -1,3 +1,9 @@
+iputils (3:20221126-1pexip2) pexip-bookworm; urgency=medium
+
+  * Bookworm build for product distribution
+
+ -- Mark Hymers <mark.hymers@pexip.com>  Sat, 09 Dec 2023 22:52:48 +0000
+
 iputils (3:20221126-1pexip1) pexip-bookworm; urgency=medium
 
   * Initial bookworm build
