@@ -1,4 +1,5 @@
+# based on https://salsa.debian.org/printing-team/cups/-/blob/debian/main/debian/watch?ref_type=heads
 version=4
-opts="filenamemangle=s%(?:.*?)?v?(\d[\d.]*)\.tar\.gz-$1.tar.xz"
-  https://github.com/iputils/iputils/tags \
-  (?:.*?/)?v?s(\d[\d.]*)\.tar\.gz debian uupdate
+opts="searchmode=plain,\
+https://api.github.com/repos/iputils/@PACKAGE@/releases \
+https://github.com/iputils/@PACKAGE@/releases/download/?[\d.]+/@PACKAGE@-@ANY_VERSION@@ARCHIVE_EXT@

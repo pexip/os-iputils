@@ -5,7 +5,7 @@ Maintainer: Noah Meyerhans <noahm@debian.org>
 Standards-Version: 4.5.0
 Build-Depends: debhelper-compat (= 13), xsltproc, docbook-xsl,
  docbook-xsl-ns, libcap-dev, iproute2,
- libgcrypt-dev, libidn2-dev, bash (>= 3), meson, pkg-config
+ libidn2-dev, bash (>= 3), meson, pkgconf
 Vcs-Git: https://salsa.debian.org/debian/iputils.git
 Vcs-Browser: https://salsa.debian.org/debian/iputils
 Homepage: https://github.com/iputils/iputils/
@@ -14,7 +14,8 @@ Package: iputils-ping
 Architecture: any
 Provides: ping
 Priority: important
-Depends: libcap2-bin, ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: linux-sysctl-defaults
 Multi-Arch: foreign
 Description: Tools to test the reachability of network hosts
  The ping command sends ICMP ECHO_REQUEST packets to a host in order to
@@ -45,7 +46,7 @@ Description: Tool to send ICMP echo requests to an ARP address
 
 Package: iputils-clockdiff
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: libcap2-bin, ${shlibs:Depends}, ${misc:Depends}
 Multi-Arch: foreign
 Description: Measure the time difference between networked computers
  Clockdiff computes the difference between the time of the machine on

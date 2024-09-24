@@ -1,9 +1,25 @@
-iputils (3:20221126-1+deb12u1) bookworm; urgency=medium
+iputils (3:20240905-1) unstable; urgency=medium
 
-  * Import upstream fix for incorrect ping receiving packets intended for other
-    processes (Closes: #1040313)
+  * New upstream release
+  * Drop unused libgcrypt-dev builddep (Closes: #1071869)
+  * ping: Add Recommends on linux-sysctl-defaults and stop setting additional
+    capabilities (Closes: #1008281)
+  * Replace pkg-config with pkgconf in build-deps
+  * Set cap_sys_nice in iputils-clockdiff (Closes: #991252)
 
- -- Noah Meyerhans <noahm@debian.org>  Tue, 24 Sep 2024 13:00:36 -0400
+ -- Noah Meyerhans <noahm@debian.org>  Tue, 24 Sep 2024 12:24:14 -0400
+
+iputils (3:20240117-1) unstable; urgency=medium
+
+  * New upstream version. See /usr/share/doc/iputils-*/changelog.gz for
+    full details. (Closes: #1009005, #1037310, #1040313, #650479)
+  * Move ping to /usr for DEP17. (Closes: #711492, #1059916)
+  * Update debian/watch (Thanks Petr Vorel <pvorel@suse.cz) (Closes: #1059728)
+  * Update debian/copyright to correct Upstream-Contact field
+  * Stop falling back to setuid binaries for raw socket access
+  * debian/rules: Ensure build-dir is removed in clean
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 11 Feb 2024 11:16:58 -0800
 
 iputils (3:20221126-1) unstable; urgency=medium
 

@@ -52,7 +52,7 @@ xml:id="man.tracepath">
     </cmdsynopsis>
   </refsynopsisdiv>
 
-  <refsection>
+  <refsection xml:id="description">
     <info>
       <title>DESCRIPTION</title>
     </info>
@@ -75,7 +75,7 @@ xml:id="man.tracepath">
     history.</para>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="options">
     <info>
       <title>OPTIONS</title>
     </info>
@@ -174,17 +174,75 @@ root@mops:~ # tracepath -6 3ffe:2400:0:109::2
     the path to the corresponding network hop. It contains
     the value of RTT, and additionally it can show Path MTU when it
     changes. If the path is asymmetric or the probe finishes before
-    it reaches the prescribed hop, the difference between number of
-    hops in forward and return direction is shown next to the
-    keyword "async". This information is not reliable, e.g. the
-    third line shows asymmetry of 1. This is because the first probe
-    with TTL of 2 was rejected at the first hop due to Path MTU
-    Discovery.</para>
+    it reaches the prescribed hop, the number of hops in return
+    direction is shown next to the keyword "asymm". This information
+    is not reliable, e.g. the third line shows asymmetry of 1. This
+    is because the first probe with TTL of 2 was rejected at the
+    first hop due to Path MTU Discovery.</para>
     <para>The last line summarizes information about all the paths
     to the destination. It shows detected Path MTU, amount of hops
     to the destination and our guess about the number of hops from
     the destination to us, which can be different when the path is
     asymmetric.</para>
+  </refsect1>
+
+  <refsect1 id='handling_errors'>
+    <title>HANDLING ERRORS</title>
+	<para>In case of errors <command>tracepath</command> prints short
+	error code.</para>
+    <informaltable>
+    <tgroup cols="3">
+	<thead>
+	<row>
+	<entry>Output</entry>
+	<entry>Code</entry>
+	<entry>Meaning</entry>
+	</row>
+	</thead>
+	<tfoot>
+	<row>
+	<entry>!A</entry>
+	<entry>EACCES</entry>
+	<entry>Communication administratively prohibited</entry>
+	</row>
+	<row>
+	<entry>!H</entry>
+	<entry>EHOSTUNREACH</entry>
+	<entry>Destination host unreachable</entry>
+	</row>
+	<row>
+	<entry>!N</entry>
+	<entry>ENETUNREACH</entry>
+	<entry>Destination network unreachable</entry>
+	</row>
+	<row>
+	<entry>!P</entry>
+	<entry>EPROTO</entry>
+	<entry>Destination protocol unreachable</entry>
+	</row>
+	<row>
+	<entry>pmtu N</entry>
+	<entry>EMSGSIZE</entry>
+	<entry>Message too long</entry>
+	</row>
+	<row>
+	<entry>reached</entry>
+	<entry>ECONNREFUSED</entry>
+	<entry>Connection refused</entry>
+	</row>
+	<row>
+	<entry></entry>
+	<entry>ETIMEDOUT</entry>
+	<entry>Connection timed out</entry>
+	</row>
+	<row>
+	<entry>NET ERROR N</entry>
+	<entry></entry>
+	<entry>Any other error</entry>
+	</row>
+	</tfoot>
+	</tgroup>
+	</informaltable>
   </refsect1>
 
   <refsect1 id='see_also'>

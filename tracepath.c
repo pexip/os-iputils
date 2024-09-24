@@ -11,6 +11,7 @@
 
 #define _GNU_SOURCE
 
+#include <assert.h>
 #include <arpa/inet.h>
 #include <errno.h>
 #include <limits.h>
@@ -192,7 +193,7 @@ static int recverr(struct run_state *const ctl)
 		ctl->his[slot].hops = 0;
 	}
 	if (recv_size == sizeof(rcvbuf)) {
-		if (rcvbuf.ttl == 0 || rcvbuf.ts.tv_sec == 0)
+		if (rcvbuf.ttl == 0 || (rcvbuf.ts.tv_sec == 0 && rcvbuf.ts.tv_nsec == 0))
 			broken_router = 1;
 		else {
 			sndhops = rcvbuf.ttl;
@@ -283,8 +284,9 @@ static int recverr(struct run_state *const ctl)
 		struct timespec res;
 
 		timespecsub(&ts, retts, &res);
-		printf(_("%3ld.%03ldms "), res.tv_sec * 1000 + res.tv_nsec / 1000000,
-					   (res.tv_nsec % 1000000) / 1000);
+		printf(_("%3lld.%03ldms "), (long long int)res.tv_sec * 1000
+			   + res.tv_nsec / 1000000, (res.tv_nsec % 1000000) / 1000);
+
 		if (broken_router)
 			printf(_("(This broken router returned corrupted payload) "));
 	}
@@ -321,10 +323,8 @@ static int recverr(struct run_state *const ctl)
 		     e->ee_type == ICMPV6_TIME_EXCEED &&
 		     e->ee_code == ICMPV6_EXC_HOPLIMIT)) {
 			if (rethops >= 0) {
-				if (sndhops >= 0 && rethops != sndhops)
-					printf(_("asymm %2d "), rethops);
-
-				if (sndhops < 0 && rethops != ctl->ttl)
+				if ((sndhops >= 0 && rethops != sndhops) ||
+					(sndhops < 0 && rethops != ctl->ttl))
 					printf(_("asymm %2d "), rethops);
 			}
 			printf("\n");
@@ -403,13 +403,13 @@ static void usage(void)
 		"\nOptions:\n"
 		"  -4             use IPv4\n"
 		"  -6             use IPv6\n"
-		"  -b             print both name and ip\n"
+		"  -b             print both name and IP\n"
 		"  -l <length>    use packet <length>\n"
 		"  -m <hops>      use maximum <hops>\n"
-		"  -n             no dns name resolution\n"
+		"  -n             no reverse DNS name resolution\n"
 		"  -p <port>      use destination <port>\n"
 		"  -V             print version and exit\n"
-		"  <destination>  dns name or ip address\n"
+		"  <destination>  DNS name or IP address\n"
 		"\nFor more details see tracepath(8).\n"));
 	exit(-1);
 }
@@ -512,6 +512,7 @@ int main(int argc, char **argv)
 	}
 
 	for (ctl.ai = result; ctl.ai; ctl.ai = ctl.ai->ai_next) {
+		assert(ctl.ai != NULL);
 		if (ctl.ai->ai_family != AF_INET6 && ctl.ai->ai_family != AF_INET)
 			continue;
 		ctl.socket_fd = socket(ctl.ai->ai_family, ctl.ai->ai_socktype, ctl.ai->ai_protocol);
@@ -532,7 +533,7 @@ int main(int argc, char **argv)
 		if (ctl.mtu <= ctl.overhead)
 			goto pktlen_error;
 
-		on = IPV6_PMTUDISC_DO;
+		on = IPV6_PMTUDISC_PROBE;
 		if (setsockopt(ctl.socket_fd, SOL_IPV6, IPV6_MTU_DISCOVER, &on, sizeof(on)) &&
 		    (on = IPV6_PMTUDISC_DO, setsockopt(ctl.socket_fd, SOL_IPV6,
 		     IPV6_MTU_DISCOVER, &on, sizeof(on))))
@@ -557,7 +558,7 @@ int main(int argc, char **argv)
 		if (ctl.mtu <= ctl.overhead)
 			goto pktlen_error;
 
-		on = IP_PMTUDISC_DO;
+		on = IP_PMTUDISC_PROBE;
 		if (setsockopt(ctl.socket_fd, SOL_IP, IP_MTU_DISCOVER, &on, sizeof(on)))
 			error(1, errno, "IP_MTU_DISCOVER");
 		on = 1;
