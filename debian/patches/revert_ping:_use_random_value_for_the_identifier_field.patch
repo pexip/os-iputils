@@ -1,0 +1,152 @@
+From d466aabcadcc2d7fd1f132ea3f580ad102773cf9 Mon Sep 17 00:00:00 2001
+From: Petr Vorel <pvorel@suse.cz>
+Date: Wed, 6 Dec 2023 15:42:16 +0100
+Subject: [PATCH] Revert "ping: use random value for the identifier field"
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This reverts commit 5026c2221a15bf13e601eade015c971bf07a27e9.
+
+Unlike TCP and UDP, which use port to uniquely identify the socket to
+deliver data, ICMP use identifier field (ID) to identify the socket.
+
+Therefore if on the same machine, at the same time, two ping processes
+use the same ID, echo reply can be delivered to the wrong socket.
+
+This is known problem due 16 bit ID field (65535). We used to use PID
+to get unique number. The default value of /proc/sys/kernel/pid_max is
+32768 (half).
+
+The problem is not new, but it was hidden until 5f6bec5 ("ping: Print
+reply with wrong source with warning").  5026c22 changed it to use our
+random implementation to increase security. But that actually increases
+the collisions on systems that use ping heavily: e.g. ping run with
+Nagios via Debian specific check-host-alive Nagios plugin:
+
+    $ ping -n -v -D -W 1 -i 1 -c 5 -M 'do' -s 56 -O "$Host")
+
+(75-100 ping instances in the reported issue.)
+
+Because we consider warning from 5f6bec5 useful and not consider leaking
+PID information as a real security issue, we revert 5026c22. getpid() is
+used in other ping implementations:
+
+* fping
+https://github.com/schweikert/fping/blob/develop/src/fping.c#L496
+
+* busybox
+https://git.busybox.net/busybox/tree/networking/ping.c#n376
+
+* FreeBSD
+https://cgit.freebsd.org/src/tree/sbin/ping/ping.c#n632
+
+* inetutils
+https://git.savannah.gnu.org/cgit/inetutils.git/tree/ping/ping.c#n286
+
+* Apple
+https://opensource.apple.com/source/network_cmds/network_cmds-433/ping.tproj/ping.c.auto.html
+
+In case leaking PID *is* a real problem, we could solve this with
+comparing the ICMP optional data.  We could add 128 bit random value to
+check. But we already use struct timeval if packet size is big enough
+for it (>= 16 bits), therefore we could use it for comparing for most of
+the packet sizes (the default is 56 bits).
+
+Fixes: https://github.com/iputils/iputils/issues/489
+Closes: https://github.com/iputils/iputils/pull/503
+Reported-by: Miloslav Hůla <miloslav.hula@gmail.com>
+Suggested-by: Cyril Hrubis <chrubis@suse.cz>
+Acked-by: Johannes Segitz jsegitz@suse.de
+Acked-by: Cyril Hrubis <chrubis@suse.cz>
+Signed-off-by: Petr Vorel <pvorel@suse.cz>
+---
+ ping/node_info.c    | 1 +
+ ping/ping.c         | 4 +---
+ ping/ping.h         | 2 +-
+ ping/ping6_common.c | 2 +-
+ ping/ping_common.c  | 4 ++--
+ 5 files changed, 6 insertions(+), 7 deletions(-)
+
+Index: iputils/ping/node_info.c
+===================================================================
+--- iputils.orig/ping/node_info.c
++++ iputils/ping/node_info.c
+@@ -91,6 +91,7 @@ int niquery_is_enabled(struct ping_ni *n
+ void niquery_init_nonce(struct ping_ni *ni)
+ {
+ #if PING6_NONCE_MEMORY
++	iputils_srand();
+ 	ni->nonce_ptr = calloc(NI_NONCE_SIZE, MAX_DUP_CHK);
+ 	if (!ni->nonce_ptr)
+ 		error(2, errno, "calloc");
+Index: iputils/ping/ping.c
+===================================================================
+--- iputils.orig/ping/ping.c
++++ iputils/ping/ping.c
+@@ -561,8 +561,6 @@ main(int argc, char **argv)
+ 	if (!argc)
+ 		error(1, EDESTADDRREQ, "usage error");
+ 
+-	iputils_srand();
+-
+ 	target = argv[argc - 1];
+ 
+ 	rts.outpack = malloc(rts.datalen + 28);
+@@ -1504,7 +1502,7 @@ in_cksum(const unsigned short *addr, int
+ /*
+  * pinger --
+  * 	Compose and transmit an ICMP ECHO REQUEST packet.  The IP packet
+- * will be added on by the kernel.  The ID field is a random number,
++ * will be added on by the kernel.  The ID field is our UNIX process ID,
+  * and the sequence number is an ascending integer.  The first several bytes
+  * of the data portion are used to hold a UNIX "timeval" struct in VAX
+  * byte-order, to compute the round-trip time.
+Index: iputils/ping/ping.h
+===================================================================
+--- iputils.orig/ping/ping.h
++++ iputils/ping/ping.h
+@@ -149,7 +149,7 @@ struct ping_rts {
+ 	size_t datalen;
+ 	char *hostname;
+ 	uid_t uid;
+-	int ident;			/* random id to identify our packets */
++	int ident;			/* process id to identify our packets */
+ 
+ 	int sndbuf;
+ 	int ttl;
+Index: iputils/ping/ping6_common.c
+===================================================================
+--- iputils.orig/ping/ping6_common.c
++++ iputils/ping/ping6_common.c
+@@ -578,7 +578,7 @@ out:
+ /*
+  * pinger --
+  * 	Compose and transmit an ICMP ECHO REQUEST packet.  The IP packet
+- * will be added on by the kernel.  The ID field is a random number,
++ * will be added on by the kernel.  The ID field is our UNIX process ID,
+  * and the sequence number is an ascending integer.  The first several bytes
+  * of the data portion are used to hold a UNIX "timeval" struct in VAX
+  * byte-order, to compute the round-trip time.
+Index: iputils/ping/ping_common.c
+===================================================================
+--- iputils.orig/ping/ping_common.c
++++ iputils/ping/ping_common.c
+@@ -303,7 +303,7 @@ void print_timestamp(struct ping_rts *rt
+ /*
+  * pinger --
+  * 	Compose and transmit an ICMP ECHO REQUEST packet.  The IP packet
+- * will be added on by the kernel.  The ID field is a random number,
++ * will be added on by the kernel.  The ID field is our UNIX process ID,
+  * and the sequence number is an ascending integer.  The first several bytes
+  * of the data portion are used to hold a UNIX "timeval" struct in VAX
+  * byte-order, to compute the round-trip time.
+@@ -535,7 +535,7 @@ void setup(struct ping_rts *rts, socket_
+ 	}
+ 
+ 	if (sock->socktype == SOCK_RAW && rts->ident == -1)
+-		rts->ident = rand() & IDENTIFIER_MAX;
++		rts->ident = htons(getpid() & 0xFFFF);
+ 
+ 	set_signal(SIGINT, sigexit);
+ 	set_signal(SIGALRM, sigexit);
