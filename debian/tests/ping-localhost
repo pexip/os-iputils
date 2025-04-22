@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# test basic ping functionality with deadline and count options specified
+
+set -e
+start=$EPOCHSECONDS
+# Specify a net.ipv4.ping_group_range that permits non-root users to
+# create non-raw ICMP sockets.  See
+# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1008281 for
+# context
+sudo sysctl -w net.ipv4.ping_group_range="0 65534"
+ping -q -w120 -c10 localhost
+elapsed=$((EPOCHSECONDS-start))
+
+if [ $elapsed -le 5 ]; then
+cat <<EOF >&2
+ping exited sooner than expected based on the provided command line, resulting in a failed test
+(elapsed time: ${elapsed}s)
+EOF
+exit 1
+fi

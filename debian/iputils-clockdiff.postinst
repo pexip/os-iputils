@@ -5,8 +5,7 @@ set -e
 PROGRAM=$(dpkg-divert --truename /usr/bin/clockdiff)
 
 if [ "$1" = configure ]; then
-    if setcap cap_net_raw+ep $PROGRAM &&
-            setcap cap_sys_nice+ep $PROGRAM; then
+    if setcap "cap_net_raw+ep cap_sys_nice+ep" $PROGRAM; then
         chmod u-s $PROGRAM
     fi
 fi
