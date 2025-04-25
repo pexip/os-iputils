@@ -91,6 +91,7 @@ int niquery_is_enabled(struct ping_ni *ni)
 void niquery_init_nonce(struct ping_ni *ni)
 {
 #if PING6_NONCE_MEMORY
+	iputils_srand();
 	ni->nonce_ptr = calloc(NI_NONCE_SIZE, MAX_DUP_CHK);
 	if (!ni->nonce_ptr)
 		error(2, errno, "calloc");
@@ -319,7 +320,7 @@ static int niquery_option_subject_name_handler(struct ping_ni *ni, int index, co
 	if (p) {
 		*p = '\0';
 		if (strlen(p + 1) >= IFNAMSIZ)
-			error(1, 0, _("too long scope name"));
+			error(2, 0, _("too long scope name"));
 	}
 
 	namelen = strlen(idn);
@@ -390,7 +391,7 @@ errexit:
 	free(buf);
 	free(canonname);
 	free(idn);
-	exit(1);
+	exit(2);
 }
 
 int niquery_option_help_handler(struct ping_ni *ni __attribute__((__unused__)),

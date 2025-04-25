@@ -24,11 +24,15 @@ xml:id="man.ping">
     <cmdsynopsis sepchar=" ">
       <command>ping</command>
       <arg choice="opt" rep="norepeat">
-        <option>-aAbBdCDefhLnOqrRUvV46</option>
+        <option>-aAbBdCDfhHLnOqrRUvV346</option>
       </arg>
       <arg choice="opt" rep="norepeat">
         <option>-c
         <replaceable>count</replaceable></option>
+      </arg>
+      <arg choice="opt" rep="norepeat">
+        <option>-e
+        <replaceable>identifier</replaceable></option>
       </arg>
       <arg choice="opt" rep="norepeat">
         <option>-F
@@ -95,7 +99,7 @@ xml:id="man.ping">
     </cmdsynopsis>
   </refsynopsisdiv>
 
-  <refsection>
+  <refsection xml:id="description">
     <info>
       <title>DESCRIPTION</title>
     </info>
@@ -118,11 +122,19 @@ xml:id="man.ping">
     IPv6 source routing was deprecated (RFC5095).</para>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="options">
     <info>
       <title>OPTIONS</title>
     </info>
     <variablelist remap="TP">
+      <varlistentry>
+        <term>
+          <option>-3</option>
+        </term>
+        <listitem>
+          <para>RTT precision (do not round up the result time).</para>
+        </listitem>
+      </varlistentry>
       <varlistentry>
         <term>
           <option>-4</option>
@@ -155,8 +167,9 @@ xml:id="man.ping">
           <para>Adaptive ping. Interpacket interval adapts to
           round-trip time, so that effectively not more than one
           (or more, if preload is set) unanswered probe is present
-          in the network. Minimal interval is 200msec unless
-          super-user. On networks with low RTT this mode is
+          in the network. The default interval is 2 ms,
+          for more info see option <option>-i</option>.
+          On networks with low RTT this mode is
           essentially equivalent to flood mode.</para>
         </listitem>
       </varlistentry>
@@ -214,7 +227,17 @@ xml:id="man.ping">
       </varlistentry>
       <varlistentry>
         <term>
+          <option>-D</option>
+        </term>
+        <listitem>
+          <para>Print timestamp (unix time + microseconds as in
+          gettimeofday) before each line.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
           <option>-e</option>
+          <emphasis remap="I">identifier</emphasis>
         </term>
         <listitem>
           <para>Set the identification field of ECHO_REQUEST.
@@ -222,15 +245,6 @@ xml:id="man.ping">
           (not supported on <emphasis remap="I">ICMP datagram socket</emphasis>).
           The value of the field may be printed with <option>-v</option> option.
           </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term>
-          <option>-D</option>
-        </term>
-        <listitem>
-          <para>Print timestamp (unix time + microseconds as in
-          gettimeofday) before each line.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -269,6 +283,20 @@ xml:id="man.ping">
       </varlistentry>
       <varlistentry>
         <term>
+          <option>-H</option>
+        </term>
+        <listitem>
+          <para>Force DNS name resolution for the output. Useful for numeric
+          destination, or <option>-f</option> option, which by default do not
+          perform it. It can also help to workaround DNS resolution problems.
+          Override previously defined <option>-n</option> option.
+          See also <emphasis remap="I">IPUTILS_PING_PTR_LOOKUP</emphasis>
+          environment variable.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
           <option>-i</option>
           <emphasis remap="I">interval</emphasis>
         </term>
@@ -280,7 +308,8 @@ xml:id="man.ping">
           The default is to wait for one second between each packet
           normally, or not to wait in flood mode.
           Only super-user may set interval to values
-          less than 2 ms.</para>
+          less than 2 ms. Broadcast and multicast ping have even
+          higher limitation for regular user: minimum is 1 sec.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -339,7 +368,12 @@ xml:id="man.ping">
           <emphasis remap="I">mark</emphasis> to tag the packets
           going out. This is useful for variety of reasons within
           the kernel such as using policy routing to select
-          specific outbound processing.</para>
+          specific outbound processing. CAP_NET_ADMIN or CAP_NET_RAW
+          (since Linux 5.17) capability is required, see
+          <citerefentry>
+            <refentrytitle>socket</refentrytitle>
+            <manvolnum>7</manvolnum>
+          </citerefentry>.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -351,10 +385,13 @@ xml:id="man.ping">
           <para>Select Path MTU Discovery strategy.
           <emphasis remap="I">pmtudisc_option</emphasis> may be
           either
-          <emphasis remap="I">do</emphasis> (prohibit fragmentation,
-          even local one),
+          <emphasis remap="I">do</emphasis> (set DF flag but
+          subject to PMTU checks by kernel, packets too large will
+          be rejected),
           <emphasis remap="I">want</emphasis> (do PMTU discovery,
-          fragment locally when packet size is large), or
+          fragment locally when packet size is large),
+          <emphasis remap="I">probe</emphasis> (set DF flag and
+          bypass PMTU checks, useful for probing), or
           <emphasis remap="I">dont</emphasis> (do not set DF
           flag).</para>
         </listitem>
@@ -365,7 +402,7 @@ xml:id="man.ping">
           <emphasis remap="I">nodeinfo_option</emphasis>
         </term>
         <listitem>
-          <para>IPv6 only. Send ICMPv6 Node Information Queries
+          <para>IPv6 only. Send IPv6 Node Information Queries
           (RFC4620), instead of Echo Request. CAP_NET_RAW
           capability is required.</para>
           <variablelist remap="TP">
@@ -514,8 +551,13 @@ xml:id="man.ping">
           <option>-n</option>
         </term>
         <listitem>
-          <para>Numeric output only. No attempt will be made to
-          lookup symbolic names for host addresses.</para>
+          <para>Numeric output only. No attempt will be made to lookup
+          symbolic names for host addresses (no reverse DNS resolution).
+          This is the default for numeric destination or <option>-f</option>
+          option.  Override previously defined <option>-H</option> option.
+          See also <emphasis remap="I">IPUTILS_PING_PTR_LOOKUP</emphasis>
+          environment variable.
+          </para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -608,8 +650,12 @@ xml:id="man.ping">
         <listitem>
           <para>Specifies the number of data bytes to be sent. The
           default is 56, which translates into 64 ICMP data bytes
-          when combined with the 8 bytes of ICMP header
-          data.</para>
+          when combined with the 8 bytes of ICMP header data.
+          The maximum allowed value is 65507 for IPv4
+          (65467 when <option>-R</option> or <option>-T</option>
+          or Intermediate <emphasis remap="I">hop</emphasis>s)
+          or 65527 for IPv6, but most systems
+          limit this to a smaller, system-dependent number.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -733,6 +779,26 @@ xml:id="man.ping">
     brief summary is displayed. Shorter current statistics can be
     obtained without termination of process with signal
     SIGQUIT.</para>
+    <para>This program is intended for use in network testing,
+    measurement and management. Because of the load it can impose
+    on the network, it is unwise to use
+    <command>ping</command> during normal operations or from
+    automated scripts.</para>
+  </refsection>
+
+  <refsection xml:id="environment">
+    <info>
+      <title>ENVIRONMENT</title>
+    </info>
+	<emphasis remap="I">IPUTILS_PING_PTR_LOOKUP</emphasis> environment
+	variable set to 0 disable reverse DNS resolution (PTR lookup) by default.
+	It will be overrided by <option>-H</option> or <option>-n</option> option.
+  </refsection>
+
+  <refsection xml:id="exit_status">
+    <info>
+      <title>EXIT STATUS</title>
+    </info>
     <para>If
     <command>ping</command> does not receive any reply packets at
     all it will exit with code 1. If a packet
@@ -745,14 +811,9 @@ xml:id="man.ping">
     also exit with code 1. On other error it exits with code 2.
     Otherwise it exits with code 0. This makes it possible to use
     the exit code to see if a host is alive or not.</para>
-    <para>This program is intended for use in network testing,
-    measurement and management. Because of the load it can impose
-    on the network, it is unwise to use
-    <command>ping</command> during normal operations or from
-    automated scripts.</para>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="ipv6_link_local_destinations">
     <info>
       <title>IPV6 LINK-LOCAL DESTINATIONS</title>
     </info>
@@ -828,6 +889,29 @@ xml:id="man.ping">
     hosts).</para>
   </refsection>
 
+  <refsection xml:id="id_collisions">
+    <info>
+      <title>ID COLLISIONS</title>
+    </info>
+    <para>
+    Unlike TCP and UDP, which use port to uniquely identify the recipient to
+    deliver data, ICMP uses identifier field (ID) for identification.
+    Therefore, if on the same machine, at the same time, two ping processes
+    use the same ID, echo reply can be delivered to a wrong recipient.
+    This is a known problem due to the limited size of the 16-bit ID field.
+    That is a historical limitation of the protocol that cannot be fixed
+    at the moment unless we encode an ID into the ping packet payload.
+    <command>ping</command> prints <emphasis remap="I">DIFFERENT ADDRESS</emphasis>
+    error and packet loss is negative.
+    </para>
+    <para>
+    <command>ping</command> uses PID to get unique number.  The default value of
+    <emphasis remap="I">/proc/sys/kernel/pid_max</emphasis> is 32768.
+    On the systems that use ping heavily and with <emphasis remap="I">pid_max</emphasis>
+    greater than 65535 collisions are bound to happen.
+    </para>
+  </refsection>
+
   <refsection xml:id="trying_different_data_patterns">
     <info>
       <title>TRYING DIFFERENT DATA PATTERNS</title>
@@ -864,25 +948,14 @@ xml:id="man.ping">
     being thrown away. In current practice you can expect each
     router in the Internet to decrement the TTL field by exactly
     one.</para>
-    <para>The TCP/IP specification states that the TTL field for
-    TCP packets should be set to 60, but many systems use smaller
-    values (4.3 BSD uses 30, 4.2 used 15).</para>
-    <para>The maximum possible value of this field is 255, and most
-    Unix systems set the TTL field of ICMP ECHO_REQUEST packets to
-    255. This is why you will find you can “ping” some hosts, but
-    not reach them with
-    <citerefentry>
-      <refentrytitle>telnet</refentrytitle>
-      <manvolnum>1</manvolnum>
-    </citerefentry> or
-    <citerefentry>
-      <refentrytitle>ftp</refentrytitle>
-      <manvolnum>1</manvolnum>
-    </citerefentry>.</para>
-    <para>In normal operation ping prints the TTL value from the
-    packet it receives. When a remote system receives a ping
-    packet, it can do one of three things with the TTL field in its
-    response:</para>
+    <para>The TTL field for TCP packets may take various values.
+    The maximum possible value of this field is 255, a recommended
+    initial value is 64. For more information, see the TCP/Lower-Level
+    Interface section of RFC9293.</para>
+    <para>In normal operation <command>ping</command> prints the TTL
+    value from the packet it receives. When a remote system receives
+    a ping packet, it can do one of three things with the TTL field in
+    its response:</para>
     <variablelist remap="TP">
       <varlistentry>
         <listitem>

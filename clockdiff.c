@@ -210,7 +210,7 @@ static int measure_inner_loop(struct run_state *ctl, struct measure_vars *mv)
 	struct pollfd p = { .fd = ctl->sock_raw, .events = POLLIN | POLLHUP };
 
 	{
-		long tmo = ctl->rtt + ctl->rtt_sigma;
+		long tmo = MAX(ctl->rtt + ctl->rtt_sigma, 1);
 
 		mv->tout.tv_sec = tmo / 1000;
 		mv->tout.tv_nsec = (tmo - (tmo / 1000) * 1000) * 1000000;
@@ -454,14 +454,14 @@ static void usage(int exit_status)
 		"  clockdiff [options] <destination>\n"
 		"\nOptions:\n"
 		"                without -o, use icmp timestamp only (see RFC0792, page 16)\n"
-		"  -o            use ip timestamp and icmp echo\n"
-		"  -o1           use three-term ip timestamp and icmp echo\n"
+		"  -o            use IP timestamp and icmp echo\n"
+		"  -o1           use three-term IP timestamp and icmp echo\n"
 		"  -T, --time-format <ctime|iso>\n"
 		"                  specify display time format, ctime is the default\n"
 		"  -I            alias of --time-format=iso\n"
 		"  -h, --help    display this help\n"
 		"  -V, --version print version and exit\n"
-		"  <destination> dns name or ip address\n"
+		"  <destination> DNS name or IP address\n"
 		"\nFor more details see clockdiff(8).\n"));
 	exit(exit_status);
 }
@@ -525,6 +525,12 @@ int main(int argc, char **argv)
 	};
 	struct addrinfo *result;
 	int status;
+
+#ifdef ENABLE_NLS
+	setlocale(LC_ALL, "");
+	bindtextdomain (PACKAGE_NAME, LOCALEDIR);
+	textdomain (PACKAGE_NAME);
+#endif
 
 	atexit(close_stdout);
 
@@ -623,7 +629,7 @@ int main(int argc, char **argv)
 				ctl.hisname, ctl.rtt, ctl.rtt_sigma, ctl.min_rtt,
 				ctl.measure_delta, ctl.measure_delta1, s);
 		} else {
-			printf("%ld %d %d\n", now, ctl.measure_delta, ctl.measure_delta1);
+			printf("%lld %d %d\n", (long long)now, ctl.measure_delta, ctl.measure_delta1);
 		}
 	}
 	exit(0);
