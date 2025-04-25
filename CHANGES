@@ -1,5 +1,147 @@
+===== 20240905 =====
+Released September 05, 2024
+
+Mostly ping fixes release.
+
+* Notable changes (for details see below)
+- Allow to disable reverse DNS resolution (PTR lookup) with with environment
+  variable IPUTILS_PING_PTR_LOOKUP=0
+- Lower max allowed -s value to 65507 (IPv4) or 65527 (IPv6). That is the
+  maximum the Linux kernel supports.
+- Include pre-generated man pages & HTML docs in dist tarballs. This allows to
+  avoid libxslt, docbook, ... as a build dependencies.
+- require meson >= 0.44
+- ping has new option -3
+
+* ping
+- Allow to disable reverse DNS resolution (PTR lookup) with with environment
+  variable IPUTILS_PING_PTR_LOOKUP=0 (commit: 6fc68b1, PR: #553, issue: #531)
+- Add option -3 (don't round up the RTT time) (commit: 48ae5c9, PR: #540)
+- fix: Fix IPv4 checksum check always succeeding once again (commit: bacf1b7,
+  PR: #534)
+- fix: Lower max allowed -s value to 65507 (IPv4) or 65527 (IPv6) (commit:
+  1e24c5b, issue: #542, PR: #550)
+- fix: Fix node info exit code (commit: 3840637, issue: #528)
+- fix: Fix integer overflow for high -s values (commit: aaa3dc3, issue: #542, PR:
+  #550)
+- fix: Fix EMSGSIZE on -s > 65527 on ICMP datagram socket (commit: aaa3dc3,
+  issue: #542, PR: #550)
+- fix: Fix print time_t problem on 32 bits platform (commit: 0fd2db7, PR: #533)
+- fix: Fix exit code on missing target (commit: 294a65f, issue: #528)
+- fix: check return value of write() to avoid integer overflow (commit: 0f12e6d,
+  PR: #545)
+- setcap-setuid.sh: Add cap_net_admin for ping (commit: 19718b0, issue: #515)
+- man: Document CAP_NET_ADMIN for -m (commit: 5b7ba7d, issue: #515)
+- reduce duplicity in warnings (commit: 0c08152, issue: #515)
+
+* arping
+- fix: Fix exit code if receive more replies than sent (commit: b589819, issue:
+  #538, PR: #546)
+- fix: Fix unsolicited ARP regressions on -c > 1 (commit: 5de892d, issue: #536,
+  PR: #543)
+- fix: Fix 1s delay on exit for unsolicited arpings (commit: 4db1de6, issue:
+  #536, PR: #541)
+
+* clockdiff
+- fix: Fix print time_t problem on 32 bits musl (commit: f2c322a)
+- fix: Fix loading localization on clockdiff (commit: c1b0e28)
+
+* tracepath
+- fix: Fix print time_t problem on 32 bits musl (commit: 536d40e)
+
+* Meson build system
+- include pre-generated man pages & HTML docs in dist tarballs (commit:
+  535f6de, issue: #479, PR: #520, https://bugs.gentoo.org/908817
+  https://bugs.gentoo.org/920901)
+- require meson >= 0.44 (released 2017, commit: c4bed6d)
+
+* CI
+- test 'meson dist' (commit: 2e8b3b2, b698ef6)
+- add 32bit build (commit: 22debcf)
+- build.sh: Configure with meson properly (commit: 01434a6)
+- remove Centos 7 (EOL, commit: 8037de5)
+
+* Localization
+- 100% translated: Czech, Finnish, Georgian, German, Indonesian, Japanese,
+  Korean, Portuguese (Brazil), Turkish, Ukrainian
+- Mostly translated: Chinese (Simplified), French
+- Fix loading localization on clockdiff
+
+===== 20240117 =====
+Released January 17, 2024
+
+* ping
+- fix: Restore -i0 (commit: 7a51494, PR: #519, regression from 2a63b94)
+
+* localization
+- Updated Turkish and Indonesian
+- 100% translated: Chinese (Simplified), Czech, French, Georgian, German,
+  Korean, Portuguese (Brazil), Turkish, Ukrainian
+- > 90% translated: Finnish, Indonesian, Japanese
+
+===== 20231222 =====
+Released December 22, 2023
+
+* arping
+- fix: Properly fix -Wpedantic warnings (commit: 80a580a, PR: #505)
+
+* clockdiff
+- fix: Set ppoll timeout minimum to 1ms (commit: 471942d, issue: #326, PR:
+  #459)
+
+* ping
+- feature: Add option -H to force reverse DNS resolution (commit: dd5a81a,
+  issue: #421, https://bugs.debian.org/650479, PR: #494)
+- feature: Decode unreachable codes added in RFC 4443 (commit: c4c7d52, PR:
+  #447)
+- feature: Allow over-PMTU-sized packets with DF set using PMTUDISC_PROBE
+  (commit: e123cab, PR: #448)
+- fix: Revert "ping: use random value for the identifier field" to use PID
+  again (commit: d466aab, issue: #489, PR: #503, regression from s20200821)
+- fix: Fix support for DSCP (Traffic Class, option -Q) (commit: 425f711, PR:
+  #468, broken since s20060425)
+- fix: Fix the errno handling for strtod (commit: 33e78be, PR: #450, regression
+  from s20190324)
+- fix: Drop redundant setsockopt(IPV6_TCLASS) call (commit: d38519a, PR: #468,
+  regression from s20150815)
+- fix: Fix overflow on negative -i (commit: 2a63b94, issue: #465)
+- fix: Fix sporadically missing DNS record on targets with multiple IP
+  addresses (commit: 80a580a, PR: #505, regression from s20200821)
+- fix: Handle interval correctly in the first second after booting (commit:
+  7448c33, PR: #499)
+- fix: Fix presentation of IPv6 addresses with no reverse DNS (commit: bc3f2e3,
+  issue: #455, PR: #478)
+- fix: Add missing whitespace in IPv6 output (commit: 14472fc, PR: #455)
+- fix: Allow to localize help (commit: e13508a)
+- fix: Use print target when empty ai_canonname (commit: c68afd5, issue: #421)
+- Improve interval error message (commit: fb75557, PR: #487)
+- man: Mention broadcast and multicast limit for non-root (commit: e7aafa7,
+  PR: #486)
+- man: Document collisions and pid_max (commit: c515a0d, PR: #507)
+- man: Add missing parameter for -e (commit: 2400215)
+- man: Update TTL details (commit: 2beff77, issue: #488, PR: #497)
+- man: Describe the defaults for -n option, reword (commit: a6e6d24)
+
+* tracepath
+- fix: Restore the MTU probing behavior") (commit: a75feb0, PR: #448,
+  regression from s20190709)
+- fix: Fix behavior during the first second after booting (commit: c64bcd8, PR:
+  #499)
+- Add NULL pointer assert() check (commit: 065daad, PR: #498)
+- man: Fix output related docs (commit: 40c7bc3, issue: #469, PR: #470)
+- man: Document error messages (commit: 90371d2, issue: #463, PR: #495)
+
+* CI
+- Add Add CentOS Stream 9 and Rocky Linux 8 and 9 (commit: 26edb41, 0ce30ae,
+  PR: #457, #476)
+
+* localization
+- 100% translated: Chinese (Simplified), Czech, French, Georgian, German,
+  Korean, Portuguese (Brazil), Ukrainian
+- > 90% translated: Finnish, Turkish, Indonesian, Japanese
+
 ===== 20221126 =====
-released November 26, 2022
+Released November 26, 2022
 
 * removed tools (issue: #363)
 - ninfod (commit: 8f0d897, reason: experimental unused protocol)
@@ -57,7 +199,7 @@ released November 26, 2022
 - don't fail when ip binary missing (issue: #383, PR: #390)
 
 ===== 20211215 =====
-released December 15, 2021
+Released December 15, 2021
 
 * removed tools (issue: #363)
 - tftpd: removing commit: 341975a, PR: #369
@@ -117,7 +259,7 @@ released December 15, 2021
 - make tests optional with -DSKIP_TESTS=true (PR: #359)
 
 ===== 20210722 =====
-released July 22, 2021
+Released July 22, 2021
 
 * Meson build system
 - enable NO_SETCAP_OR_SUID by default
@@ -162,7 +304,7 @@ released July 22, 2021
 - fix: flood ping test should pass on root (commit: 3dff080)
 
 ===== 20210202 =====
-released February 2, 2021
+Released February 2, 2021
 
 * version scheme change: dropped leading 's' (issue: #269)
 
@@ -174,7 +316,7 @@ released February 2, 2021
 - fix infinite loop when getrandom fails (issue: #291)
 
 * arping
-- make update neighbours work again (issue: 298)
+- make update neighbours work again (issue: #298)
 
 * ping
 - fix dead loop problem (issue: #276)
@@ -196,7 +338,7 @@ released February 2, 2021
 - Use Ubuntu 20.10 groovy instead of Eoan
 
 ===== s20200821 =====
-released August 21, 2020
+Released August 21, 2020
 
 * incompatible changes
 Handling numeric options changed

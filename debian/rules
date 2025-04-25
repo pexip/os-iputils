@@ -19,3 +19,6 @@ override_dh_auto_configure:
 		-DUSE_GETTEXT=false
 
 override_dh_auto_test:
+
+execute_after_dh_clean:
+	-rm -rf build-dir

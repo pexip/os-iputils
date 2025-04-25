@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/iputils/iputils.svg?branch=master)](https://travis-ci.org/iputils/iputils)
+[![Build Status](https://github.com/iputils/iputils/actions/workflows/ci.yml/badge.svg)](https://github.com/iputils/iputils/actions/workflows/ci.yml)
 [![Coverity Status](https://scan.coverity.com/projects/1944/badge.svg?flat=1)](https://scan.coverity.com/projects/1944)
 
 The iputils package is set of small useful utilities for Linux networking.
@@ -33,7 +33,7 @@ Build dependencies are listed in scripts in
 * If fixing a bug, please document how to reproduce it.
 * Finding the commit which introduced the problem helps (bisecting). Add `Fixme:` tag.
 * If adding a feature, please describe why it's useful to add it.
-* Commits should be signed: `Your Name <me@example.org>`, see
+* Commits should be signed: `Signed-off-by: Your Name <me@example.org>`, see
 https://www.kernel.org/doc/html/latest/process/submitting-patches.html#sign-your-work-the-developer-s-certificate-of-origin.
 * Although the coding style for most tools is ancient, new code should follow the Linux kernel coding style.
 See https://www.kernel.org/doc/html/latest/process/coding-style.html.
@@ -45,7 +45,7 @@ See https://www.kernel.org/doc/html/latest/process/coding-style.html.
 ### Translators
 Localization is hosted on [Fedora Weblate](https://translate.fedoraproject.org/projects/iputils/iputils/).
 
-## Tools are included in iputils
+## Tools included in iputils
 - [arping](https://github.com/iputils/iputils/blob/master/arping.c)
 - [clockdiff](https://github.com/iputils/iputils/blob/master/clockdiff.c)
 - [ping](https://github.com/iputils/iputils/tree/master/ping)
@@ -65,7 +65,8 @@ Some obsolete tools has been removed (see
 
 ## History
 ### Alexey Kuznetsov (1999–2002)
-- first release (1999-04-16):  [`iputils-ss990417.tar.gz`](http://ftp.icm.edu.pl/packages/linux-iproute/ip-routing/iputils-ss990417.tar.gz)
+- first release (1999-01-07): `iputils-ss990107.tar.gz` (source code not available)
+- first downloadable release (1999-04-16): [`iputils-ss990417.tar.gz`](http://ftp.icm.edu.pl/packages/linux-iproute/ip-routing/iputils-ss990417.tar.gz)
 - latest release (2002-09-26): [`iputils-ss020927.tar.gz`](http://ftp.icm.edu.pl/packages/linux-iproute/ip-routing/iputils-ss020927.tar.gz)
 
 ### Hideaki Yoshifuji (2006–2015)

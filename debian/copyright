@@ -5,7 +5,7 @@ Comment:
  It has been maintained for Debian by Noah Meyerhans <noahm@debian.org>
  since 6 Feb 2001.
 Source: https://github.com/iputils/iputils
-Upstream-Contact: Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>
+Upstream-Contact: https://github.com/iputils/iputils/issues/
 
 Files: *
 Copyright:
