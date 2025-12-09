@@ -1,3 +1,9 @@
+iputils (3:20240905-3+pexip25u1) pexip-trixie; urgency=medium
+
+  * New upstream release.
+
+ -- Mark Hymers <mark.hymers@pexip.com>  Tue, 09 Dec 2025 12:10:10 +0000
+
 iputils (3:20240905-3) unstable; urgency=medium
 
   * clockdiff: Fix setcap invocation (Closes: #1103864)
