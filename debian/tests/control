@@ -1,0 +1,3 @@
+Tests: ping-localhost
+Depends: iputils-ping
+Restrictions: needs-sudo,isolation-container,skippable

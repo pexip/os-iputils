@@ -1,3 +1,17 @@
+iputils (3:20240905-2) unstable; urgency=medium
+
+  Ping is no longer installed with access to the CAP_NET_RAW linux
+  capability, but instead uses ICMP_PROTO datagram sockets for network
+  communication.  Access to these sockets is controlled by GID based on the
+  net.ipv4.ping_group_range sysctl.  In normal installations, the
+  linux-sysctl-defaults package will set this variable to a broadly permissive
+  value, allowing unprivileged users to use ping as expected.  See
+  /usr/lib/sysctl.d/50-default.conf and
+  https://docs.kernel.org/networking/ip-sysctl.html#ip-sysctl for more
+  information on the semantics of this variable.
+
+ -- Noah Meyerhans <noahm@debian.org> Mon, 21 Apr 2025 07:29:28 -0400
+
 iputils (3:20150815-1) unstable; urgency=medium
 
   As of 3:20150815-1, the ping and ping6 commands are unified in a single

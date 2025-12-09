@@ -1,3 +1,17 @@
+iputils (3:20240905-3) unstable; urgency=medium
+
+  * clockdiff: Fix setcap invocation (Closes: #1103864)
+  * Update NEWS entry for ICMP_PROTO datagram socket use
+
+ -- Noah Meyerhans <noahm@debian.org>  Tue, 22 Apr 2025 07:36:44 -0400
+
+iputils (3:20240905-2) unstable; urgency=medium
+
+  * Add autopkgtests
+  * Add a debian/NEWS entry describing the use of ICMP_PROTO sockets
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 21 Apr 2025 07:50:37 -0400
+
 iputils (3:20240905-1+pexip25u2) pexip-trixie; urgency=medium
 
   * Trixie build for product distribution
